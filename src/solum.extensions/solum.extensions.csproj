@@ -73,6 +73,7 @@
     <Compile Include="ConcurrentList.cs" />
     <Compile Include="DateTimeExtensions.cs" />
     <Compile Include="FunctionalExtensions.cs" />
+    <Compile Include="GuidExtensions.cs" />
     <Compile Include="JsonExtensions.cs" />
     <Compile Include="Locks.cs" />
     <Compile Include="ProgramExit.cs" />
