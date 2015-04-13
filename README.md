@@ -1,6 +1,6 @@
 # Solum
 
-## translation
+#### Translation
 (Solum means "Foundation" in Latin.)
 
 ## Description
