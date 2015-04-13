@@ -7,167 +7,54 @@
     <meta name="description" content="Solum Admin Panel" />
     <meta name="author" content="" />
     <title>Solum | Dashboard</title>
-    <link rel="stylesheet" href="assets/js/jquery-ui/css/no-theme/jquery-ui-1.10.3.custom.min.css">
-    <link rel="stylesheet" href="assets/css/font-icons/entypo/css/entypo.css">
-    <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Noto+Sans:400,700,400italic">
-    <link rel="stylesheet" href="assets/css/bootstrap.css">
-    <link rel="stylesheet" href="assets/css/neon-core.css">
-    <link rel="stylesheet" href="assets/css/neon-theme.css">
-    <link rel="stylesheet" href="assets/css/neon-forms.css">
-    <link rel="stylesheet" href="assets/css/custom.css">
-    <script src="assets/js/jquery-1.11.0.min.js"></script>
-    <script>$.noConflict();</script>
-    <!--[if lt IE 9]><script src="assets/js/ie8-responsive-file-warning.js"></script><![endif]-->
-    <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
-    <!--[if lt IE 9]>
-        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
-        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
-    <![endif]-->
-
+    {{> header-assets}}
 </head>
 <body class="page-body  page-fade" data-url="http://neon.dev">
     <div class="page-container">
         <!-- add class "sidebar-collapsed" to close sidebar by default, "chat-visible" to make chat appear always -->
-
-        <div class="sidebar-menu">
-            <div class="sidebar-menu-inner">
-
-                <header class="logo-env">
-                    <!-- logo -->
-                    <div class="logo">
-                        <a href="index.html">
-                            <img src="assets/images/solum-logo-arial.png" width="120" alt="" />
-                        </a>
-                    </div>
-                    <!-- logo collapse icon -->
-                    <div class="sidebar-collapse">
-                        <a href="#" class="sidebar-collapse-icon with-animation">
-                            <!-- add class "with-animation" if you want sidebar to have animation during expanding/collapsing transition -->
-                            <i class="entypo-menu with-animation"></i>
-                        </a>
-                    </div>
-
-                    <!-- open/close menu icon (do not remove if you want to enable menu on mobile devices) -->
-                    <div class="sidebar-mobile-menu visible-xs">
-                        <a href="#" class="with-animation">
-                            <!-- add class "with-animation" to support animation -->
-                            <i class="entypo-menu with-animation"></i>
-                        </a>
-                    </div>
-                </header>
-
-                <ul id="main-menu" class="main-menu">
-                    <!-- add class "multiple-expanded" to allow multiple submenus to open -->
-                    <!-- class "auto-inherit-active-class" will automatically add "active" class for parent elements who are marked already with class "active" -->
-                    <li class="active opened active">
-                        <a href="index">
-                            <i class="entypo-gauge"></i>
-                            <span class="title">Dashboard</span>
-                        </a>
-                        <ul>
-                            <li class="active">
-                                <a href="index">
-                                    <span class="title">Dashboard 1</span>
-                                </a>
-                            </li>
-                            <li>
-                                <a href="dashboard-2.html">
-                                    <span class="title">Dashboard 2</span>
-                                </a>
-                            </li>
-                        </ul>
-                    </li>
-                    <li>
-                        <a href="layout-api.html">
-                            <i class="entypo-cog"></i>
-                            <span class="title">Services</span>
-                        </a>
-                        <ul>
-                            <li>
-                                <a href="layout-api.html">
-                                    <span class="title">Web Server</span>
-                                </a>
-                            </li>
-                        </ul>
-                    </li>
-                    <li>
-                        <a href="layout-api.html">
-                            <i class="entypo-switch"></i>
-                            <span class="title">API</span>
-                        </a>
-                        <ul>
-                            <li>
-                                <a href="layout-api.html">
-                                    <span class="title">Endpoints</span>
-                                </a>
-                            </li>
-                        </ul>
-                    </li>
-                </ul>
-            </div>
-        </div>
+        {{> sidebar}}
         <div class="main-content">
             <hr />
             <div class="row">
                 <div class="col-sm-3 col-xs-6">
-
                     <div class="tile-stats tile-red">
                         <div class="icon"><i class="entypo-users"></i></div>
                         <div class="num" data-start="0" data-end="83" data-postfix="" data-duration="1500" data-delay="0">0</div>
-
                         <h3>Registered users</h3>
                         <p>so far in our blog, and our website.</p>
                     </div>
-
                 </div>
-
                 <div class="col-sm-3 col-xs-6">
-
                     <div class="tile-stats tile-green">
                         <div class="icon"><i class="entypo-chart-bar"></i></div>
                         <div class="num" data-start="0" data-end="135" data-postfix="" data-duration="1500" data-delay="600">0</div>
-
                         <h3>Daily Visitors</h3>
                         <p>this is the average value.</p>
                     </div>
-
                 </div>
-
                 <div class="col-sm-3 col-xs-6">
-
                     <div class="tile-stats tile-aqua">
                         <div class="icon"><i class="entypo-mail"></i></div>
                         <div class="num" data-start="0" data-end="23" data-postfix="" data-duration="1500" data-delay="1200">0</div>
-
                         <h3>New Messages</h3>
                         <p>messages per day.</p>
                     </div>
-
                 </div>
-
                 <div class="col-sm-3 col-xs-6">
-
                     <div class="tile-stats tile-blue">
                         <div class="icon"><i class="entypo-rss"></i></div>
                         <div class="num" data-start="0" data-end="52" data-postfix="" data-duration="1500" data-delay="1800">0</div>
-
                         <h3>Subscribers</h3>
                         <p>on our site right now.</p>
                     </div>
-
                 </div>
             </div>
-
             <br />
-
             <div class="row">
                 <div class="col-sm-8">
-
                     <div class="panel panel-primary" id="charts_env">
-
                         <div class="panel-heading">
                             <div class="panel-title">Site Stats</div>
-
                             <div class="panel-options">
                                 <ul class="nav nav-tabs">
                                     <li class=""><a href="#area-chart" data-toggle="tab">Area Chart</a></li>
@@ -176,29 +63,20 @@
                                 </ul>
                             </div>
                         </div>
-
                         <div class="panel-body">
-
                             <div class="tab-content">
-
                                 <div class="tab-pane" id="area-chart">
                                     <div id="area-chart-demo" class="morrischart" style="height: 300px"></div>
                                 </div>
-
                                 <div class="tab-pane active" id="line-chart">
                                     <div id="line-chart-demo" class="morrischart" style="height: 300px"></div>
                                 </div>
-
                                 <div class="tab-pane" id="pie-chart">
                                     <div id="donut-chart-demo" class="morrischart" style="height: 300px;"></div>
                                 </div>
-
                             </div>
-
                         </div>
-
                         <table class="table table-bordered table-responsive">
-
                             <thead>
                                 <tr>
                                     <th width="50%" class="col-padding-1">
@@ -207,7 +85,6 @@
                                             <small>54,127</small>
                                         </div>
                                         <span class="pull-right pageviews">4,3,5,4,5,6,5</span>
-
                                     </th>
                                     <th width="50%" class="col-padding-1">
                                         <div class="pull-left">
@@ -218,15 +95,10 @@
                                     </th>
                                 </tr>
                             </thead>
-
                         </table>
-
                     </div>
-
                 </div>
-
                 <div class="col-sm-4">
-
                     <div class="panel panel-primary">
                         <div class="panel-heading">
                             <div class="panel-title">
@@ -236,7 +108,6 @@
                                     <small>current server uptime</small>
                                 </h4>
                             </div>
-
                             <div class="panel-options">
                                 <a href="#sample-modal" data-toggle="modal" data-target="#sample-modal-dialog-1" class="bg"><i class="entypo-cog"></i></a>
                                 <a href="#" data-rel="collapse"><i class="entypo-down-open"></i></a>
@@ -244,24 +115,17 @@
                                 <a href="#" data-rel="close"><i class="entypo-cancel"></i></a>
                             </div>
                         </div>
-
                         <div class="panel-body no-padding">
                             <div id="rickshaw-chart-demo">
                                 <div id="rickshaw-legend"></div>
                             </div>
                         </div>
                     </div>
-
                 </div>
             </div>
-
-
             <br />
-
             <div class="row">
-
                 <div class="col-sm-4">
-
                     <div class="panel panel-primary">
                         <table class="table table-bordered table-responsive">
                             <thead>
@@ -282,15 +146,11 @@
                             </tbody>
                         </table>
                     </div>
-
                 </div>
-
                 <div class="col-sm-8">
-
                     <div class="panel panel-primary">
                         <div class="panel-heading">
                             <div class="panel-title">Latest Updated Profiles</div>
-
                             <div class="panel-options">
                                 <a href="#sample-modal" data-toggle="modal" data-target="#sample-modal-dialog-1" class="bg"><i class="entypo-cog"></i></a>
                                 <a href="#" data-rel="collapse"><i class="entypo-down-open"></i></a>
@@ -298,7 +158,6 @@
                                 <a href="#" data-rel="close"><i class="entypo-cancel"></i></a>
                             </div>
                         </div>
-
                         <table class="table table-bordered table-responsive">
                             <thead>
                                 <tr>
@@ -308,7 +167,6 @@
                                     <th>Activity</th>
                                 </tr>
                             </thead>
-
                             <tbody>
                                 <tr>
                                     <td>1</td>
@@ -316,38 +174,26 @@
                                     <td>CEO</td>
                                     <td class="text-center"><span class="inlinebar">4,3,5,4,5,6</span></td>
                                 </tr>
-
                                 <tr>
                                     <td>2</td>
                                     <td>Filan Fisteku</td>
                                     <td>Member</td>
                                     <td class="text-center"><span class="inlinebar-2">1,3,4,5,3,5</span></td>
                                 </tr>
-
                                 <tr>
                                     <td>3</td>
                                     <td>Arlind Nushi</td>
                                     <td>Co-founder</td>
                                     <td class="text-center"><span class="inlinebar-3">5,3,2,5,4,5</span></td>
                                 </tr>
-
                             </tbody>
                         </table>
                     </div>
-
                 </div>
-
             </div>
-
-            <br />
-
-            <!-- Footer -->
-            <footer class="main">
-                &copy; 2015 <strong>Solum</strong> by <a href="http://bradserbu.com" target="_blank">bradserbu.com</a>
-            </footer>
+            {{> main-footer}}
         </div>
     </div>
-
     <script type="text/javascript">
         jQuery(document).ready(function ($) {
             // Sparkline Charts
@@ -359,8 +205,6 @@
             $('.linechart').sparkline();
             $('.pageviews').sparkline('html', { type: 'bar', height: '30px', barColor: '#ff6264' });
             $('.uniquevisitors').sparkline('html', { type: 'bar', height: '30px', barColor: '#00b19d' });
-
-
             $(".monthly-sales").sparkline([1, 2, 3, 5, 6, 7, 2, 3, 3, 4, 3, 5, 7, 2, 4, 3, 5, 4, 5, 6, 3, 2], {
                 type: 'bar',
                 barColor: '#485671',
@@ -368,20 +212,16 @@
                 barWidth: 10,
                 barSpacing: 2
             });
-
             // JVector Maps
             var map = $("#map");
-
             map.vectorMap({
                 map: 'europe_merc_en',
                 zoomMin: '3',
                 backgroundColor: '#383f47',
                 focusOn: { x: 0.5, y: 0.8, scale: 3 }
             });
-
             // Line Charts
             var line_chart_demo = $("#line-chart-demo");
-
             var line_chart = Morris.Line({
                 element: 'line-chart-demo',
                 data: [
@@ -398,15 +238,10 @@
                 labels: ['October 2013', 'November 2013'],
                 redraw: true
             });
-
             line_chart_demo.parent().attr('style', '');
-
-
             // Donut Chart
             var donut_chart_demo = $("#donut-chart-demo");
-
             donut_chart_demo.parent().show();
-
             var donut_chart = Morris.Donut({
                 element: 'donut-chart-demo',
                 data: [
@@ -416,15 +251,10 @@
                 ],
                 colors: ['#707f9b', '#455064', '#242d3c']
             });
-
             donut_chart_demo.parent().attr('style', '');
-
-
             // Area Chart
             var area_chart_demo = $("#area-chart-demo");
-
             area_chart_demo.parent().show();
-
             var area_chart = Morris.Area({
                 element: 'area-chart-demo',
                 data: [
@@ -441,18 +271,13 @@
                 labels: ['Series A', 'Series B'],
                 lineColors: ['#303641', '#576277']
             });
-
             area_chart_demo.parent().attr('style', '');
-
             // Rickshaw
             var seriesData = [[], []];
-
             var random = new Rickshaw.Fixtures.RandomData(50);
-
             for (var i = 0; i < 50; i++) {
                 random.addData(seriesData);
             }
-
             var graph = new Rickshaw.Graph({
                 element: document.getElementById("rickshaw-chart-demo"),
                 height: 193,
@@ -470,52 +295,38 @@
                 }
                 ]
             });
-
             graph.render();
-
             var hoverDetail = new Rickshaw.Graph.HoverDetail({
                 graph: graph,
                 xFormatter: function (x) {
                     return new Date(x * 1000).toString();
                 }
             });
-
             var legend = new Rickshaw.Graph.Legend({
                 graph: graph,
                 element: document.getElementById('rickshaw-legend')
             });
-
             var highlighter = new Rickshaw.Graph.Behavior.Series.Highlight({
                 graph: graph,
                 legend: legend
             });
-
             setInterval(function () {
                 random.removeData(seriesData);
                 random.addData(seriesData);
                 graph.update();
-
             }, 500);
         });
-
-
         function getRandomInt(min, max) {
             return Math.floor(Math.random() * (max - min + 1)) + min;
         }
     </script>
-
+    
     <!-- Imported styles on this page -->
     <link rel="stylesheet" href="assets/js/jvectormap/jquery-jvectormap-1.2.2.css">
     <link rel="stylesheet" href="assets/js/rickshaw/rickshaw.min.css">
-    <!-- Bottom scripts (common) -->
-    <script src="assets/js/gsap/main-gsap.js"></script>
-    <script src="assets/js/jquery-ui/js/jquery-ui-1.10.3.minimal.min.js"></script>
-    <script src="assets/js/bootstrap.js"></script>
-    <script src="assets/js/joinable.js"></script>
-    <script src="assets/js/resizeable.js"></script>
-    <script src="assets/js/neon-api.js"></script>
-    <script src="assets/js/jvectormap/jquery-jvectormap-1.2.2.min.js"></script>
-
+    
+    {{> footer-assets}}
+    
     <!-- Imported scripts on this page -->
     <script src="assets/js/jvectormap/jquery-jvectormap-europe-merc-en.js"></script>
     <script src="assets/js/jquery.sparkline.min.js"></script>
@@ -528,8 +339,6 @@
 
     <!-- JavaScripts initializations and stuff -->
     <script src="assets/js/neon-custom.js"></script>
-
-    <!-- Demo Settings -->
-    <script src="assets/js/neon-demo.js"></script>
 </body>
 </html>
+        

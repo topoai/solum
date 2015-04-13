@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace solum.web
 {
-    public abstract class WebResponse : IWebResponse
+    public abstract class WebResponse : Component, IWebResponse
     {
         public const string DEFAULT_CONTENT_TYPE = "text/plain";
         public const long DEFAULT_CONTENT_LENGTH = -1;

@@ -13,18 +13,25 @@ namespace solum.modules
     public class IndexModule : WebModule
     {
         public IndexModule()
-        {            
+        {
+
+        }
+
+        public override void RegisterRoutes()
+        {
             Func<HttpListenerRequest, solum.web.WebResponse> notImplemented = request =>
             {
                 return new StringResponse("text/html", "<html><body><h2>Not Implemented</h2></body></html>");
-            };            
+            };
 
-            Get("/hello", View.FromFile("views/hello-world.html"));
-            Get("/dashboard", View.FromFile("views/dashboard.html"));
+            Get("/hello/", View.FromFile("views/hello-world.html"));
+            Get("/dashboard/", View.FromFile("views/dashboard.html"));            
 
-            var indexView = View.FromFile("views/index.html");
+            var indexView = View.FromFile("views/index.html");            
             Get("/index/", indexView);
             Get("/", indexView);
+
+            Get("/databases/", View.FromFile("views/databases.html"));
         }
     }
 }

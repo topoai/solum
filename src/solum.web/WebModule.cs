@@ -10,19 +10,13 @@ using System.Threading.Tasks;
 
 namespace solum.web
 {
-    public class WebModule
+    public abstract class WebModule : Component
     {
         public WebModule()
         {
             Routes = new List<WebRouter>();
         }
         public List<WebRouter> Routes { get; private set; }
-
-        #region Static File/Directory Handlers
-        public void StaticDirectory(string route, string directory)
-        {
-        }
-        #endregion
 
         #region Http Methods
         public void Get(string route, Func<HttpListenerRequest, WebResponse> response)
@@ -40,6 +34,8 @@ namespace solum.web
             var router = new WebRouter("GET", route, response);
             Routes.Add(router);
         }
-        #endregion        
+        #endregion 
+
+        public abstract void RegisterRoutes();
     }
 }

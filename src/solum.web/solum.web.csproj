@@ -54,9 +54,6 @@
     <Prefer32Bit>true</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Handlebars">
-      <HintPath>..\packages\Handlebars.Net.1.3.0\lib\Handlebars.dll</HintPath>
-    </Reference>
     <Reference Include="Newtonsoft.Json">
       <HintPath>..\packages\Newtonsoft.Json.6.0.8\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
@@ -73,9 +70,11 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="IViewManager.cs" />
     <Compile Include="IWebResponse.cs" />
     <Compile Include="responses\StringResponse.cs" />
     <Compile Include="responses\ViewResponse.cs" />
+    <Compile Include="ViewManager.cs" />
     <Compile Include="WebModule.cs" />
     <Compile Include="WebResponse.cs" />
     <Compile Include="WebRouter.cs" />
@@ -84,6 +83,10 @@
     <Compile Include="WebServerListener.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\lib\Handlebars.Net\source\Handlebars\Handlebars.csproj">
+      <Project>{a09cff95-b671-48fe-96a8-d3cbdc110b75}</Project>
+      <Name>Handlebars</Name>
+    </ProjectReference>
     <ProjectReference Include="..\solum.core\solum.core.csproj">
       <Project>{69546c30-149a-42f6-8a73-bce9d74d553d}</Project>
       <Name>solum.core</Name>

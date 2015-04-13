@@ -54,9 +54,9 @@ namespace solum.web.responses
                 throw new FileNotFoundException("The template file was not found: {0}".format(ViewPath));
 
             var template = File.ReadAllText(ViewPath);
-
             try
             {
+                Log.Debug("Compiling view... {0}", ViewPath);
                 this.m_template = Handlebars.Compile(template);
             }
             catch (Exception ex)
