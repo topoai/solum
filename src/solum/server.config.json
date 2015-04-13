@@ -1,0 +1,15 @@
+﻿{
+    "$type": "solum.web.WebServer, solum.web",
+    "address": "http://+:8080/",
+    "modules": [
+        {
+            "$type": "solum.modules.IndexModule, solum"
+        }
+    ],
+    "static-directories": {
+        "/assets/": "./assets/"
+    },
+    "services": [
+
+    ]
+}

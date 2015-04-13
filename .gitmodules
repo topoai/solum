@@ -1,0 +1,4 @@
+[submodule "lib/RaptorDB-Document"]
+	path = lib/RaptorDB-Document
+	url = https://github.com/bradserbu/RaptorDB-Document.git
+	
