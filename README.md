@@ -1,5 +1,7 @@
-# solum
+# Solum
+
+## translation
 (Solum means "Foundation" in Latin.)
 
-## description
+## Description
 Platform, framework, and host for .NET based applications.
