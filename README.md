@@ -1,7 +1,5 @@
 # Solum
+Platform, Framework, and Runtime  for .NET based applications.
 
 #### Translation
 (Solum means "Foundation" in Latin.)
-
-## Description
-Platform, framework, and host for .NET based applications.
