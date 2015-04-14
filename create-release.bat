@@ -1,6 +1,9 @@
 @echo off
 REM xcopy /F /D /S /Y bin\* release\%current_date%\bin\
 
+REM -- Store the current path
+set orig_path=%cd%
+
 REM -- Get the current date time in the format YYYY-MM-DD
 set current_date=%DATE:~10,4%-%DATE:~4,2%-%DATE:~7,2%
 set release_dir=release\%current_date%
@@ -15,6 +18,19 @@ REM -- Create lib
 lib\utils\echoc 2 Creating release lib...
 mkdir %release_dir%\lib\
 lib\ILMerge\ILMerge.exe /v4 /out:%release_dir%\lib\solumlib.dll /wildcards bin\solum.*.dll bin\solum.exe bin\RaptorDB*.dll bin\Handlebars.dll bin\System.Threading.Tasks.Dataflow.dll
+
+REM -- Compress bin and lib to specific zip files
+lib\utils\echoc 2 Compressing binary release...
+del %release_dir%\%current_date%-solum-bin.zip
+cd %release_dir%
+%orig_path%\lib\utils\zip -r %current_date%-solum-bin.zip bin\* -x data
+cd %orig_path%
+
+lib\utils\echoc 2 Compressing lib release...
+del %release_dir%\%current_date%-solum-lib.zip
+cd %release_dir%
+%orig_path%\lib\utils\zip -r %current_date%-solum-lib.zip lib\*
+cd %orig_path%
 
 REM -- Display git status
 git status
