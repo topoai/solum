@@ -22,7 +22,7 @@ git status
 REM -- Git Add
 echo.
 set git_add=y
-set /p git_add="Git add release? [y]/n "
+set /p git_add="Git add the release folder? [y]/n "
 
 if "%git_add:~0,1%" equ "y" (
 	lib\utils\echoc 2 Adding...
@@ -31,10 +31,12 @@ if "%git_add:~0,1%" equ "y" (
 	goto COMPLETED
 )
 
+git status
+
 REM -- Git Commmit
 echo.
 set git_commit=y
-set /p git_commit="Git commit release? [y]/n "
+set /p git_commit="Git commit? [y]/n "
 
 if "%git_commit:~0,1%" equ "y" (
 	lib\utils\echoc 2 Commiting...
@@ -45,10 +47,10 @@ if "%git_commit:~0,1%" equ "y" (
 
 REM -- Git Push
 echo.
-set git_commit=y
-set /p git_commit="Git push release? [y]/n "
+set git_push=y
+set /p git_push="Git push? [y]/n "
 
-if "%git_commit:~0,1%" equ "y" (
+if "%git_push:~0,1%" equ "y" (
 	lib\utils\echoc 2 Pushing...
 	git push
 ) else (
