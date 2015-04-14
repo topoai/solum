@@ -14,7 +14,7 @@ robocopy bin %release_dir%\bin /MIR /XD data logs
 REM -- Create lib
 lib\utils\echoc 2 Creating release lib...
 mkdir %release_dir%\lib\
-lib\ILMerge\ILMerge.exe /v4 /out:%release_dir%\lib\solumlib.dll /wildcards bin\solum.*.dll bin\solum.exe bin\RaptorDB*.dll bin\Handlebars.dll bin\Newtonsoft.Json.dll bin\NLog.dll bin\System.Threading.Tasks.Dataflow.dll
+lib\ILMerge\ILMerge.exe /v4 /out:%release_dir%\lib\solumlib.dll /wildcards bin\solum.*.dll bin\solum.exe bin\RaptorDB*.dll bin\Handlebars.dll bin\System.Threading.Tasks.Dataflow.dll
 
 REM -- Display git status
 git status
