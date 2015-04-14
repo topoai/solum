@@ -57,6 +57,7 @@ if "%git_push:~0,1%" equ "y" (
 	goto COMPLETED
 )
 
+echo.
 git status
 
 :COMPLETED
