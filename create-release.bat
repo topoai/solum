@@ -1,20 +1,20 @@
-echo off
-REM xcopy /F /D /S /Y bin\* releases\%current_date%\bin\
+@echo off
+REM xcopy /F /D /S /Y bin\* release\%current_date%\bin\
 
 REM -- Get the current date time in the format YYYY-MM-DD
 set current_date=%DATE:~10,4%-%DATE:~4,2%-%DATE:~7,2%
-set release_dir=releases\%current_date%\
+set release_dir=release\%current_date%
 
 REM -- Update with contents from bin folder and copy to release directory
 lib\utils\echoc 2 Creating release binaries...
-mkdir %release_dir%bin\
+mkdir %release_dir%\bin\
 lib\utils\echoc 2 Copying \bin...
-robocopy bin %release_dir%bin /MIR /XD data logs
+robocopy bin %release_dir%\bin /MIR /XD data logs
 
 REM -- Create lib
 lib\utils\echoc 2 Creating release lib...
-mkdir %release_dir%lib\
-lib\ILMerge\ILMerge.exe /v4 /out:%release_dir%lib\solumlib.dll /wildcards bin\solum.*.dll bin\solum.exe bin\RaptorDB*.dll bin\Handlebars.dll bin\Newtonsoft.Json.dll bin\NLog.dll bin\System.Threading.Tasks.Dataflow.dll
+mkdir %release_dir%\lib\
+lib\ILMerge\ILMerge.exe /v4 /out:%release_dir%\lib\solumlib.dll /wildcards bin\solum.*.dll bin\solum.exe bin\RaptorDB*.dll bin\Handlebars.dll bin\Newtonsoft.Json.dll bin\NLog.dll bin\System.Threading.Tasks.Dataflow.dll
 
 REM -- Display git status
 git status
