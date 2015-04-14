@@ -56,7 +56,9 @@ if "%git_push:~0,1%" equ "y" (
 ) else (
 	goto COMPLETED
 )
-	
+
+git status
+
 :COMPLETED
 echo.
 lib\utils\echoc 2 Sucessfully created release %current_date%.
