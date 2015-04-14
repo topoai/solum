@@ -27,8 +27,6 @@ namespace solum.web.responses
         {
             this.ViewPath = viewPath;
             this.Model = model;
-
-            CompileTemplate();
         }
 
         public string ViewPath { get; private set; }
@@ -43,6 +41,8 @@ namespace solum.web.responses
         {
             get
             {
+                CompileTemplate();
+
                 var content = m_template(Model);
                 return content.toStream();
             }

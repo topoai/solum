@@ -12,24 +12,24 @@ namespace solum
 {
     class Program
     {
-        static Logger Log = LogManager.GetLogger("main");        
+        static Logger Log = LogManager.GetLogger("main");
 
         static void Main(string[] args)
         {
             //RunKeyValueTest();
-            Server.RunDefaultServer();
+            Server.RunServer();
             // RunProcessTests();
         }
 
         static void RunKeyValueTest()
         {
-            using (var server = new Server())
+            using (var server = Server.Current)
             {
                 var store = server.OpenKeyValueStore("test-db");
                 store.Set("name", "Brad Serbu");
 
                 string value;
-                store.Get("name", out value);                
+                store.Get("name", out value);
             }
         }
 
@@ -63,7 +63,7 @@ namespace solum
                                      {
                                          Log.Info("Waiting 100 ms...");
                                          Thread.Sleep(100);
-                                     })                                     
+                                     })
                                      .Then(hello =>
                                      {
                                          Log.Info("\t#{0:N}", ++count);
@@ -75,7 +75,7 @@ namespace solum
                                          };
                                      })
                                     .Then(hello => Log.Info("\t {0}", hello))
-                                    .Process;            
+                                    .Process;
 
             return process;
         }

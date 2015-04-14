@@ -15,7 +15,7 @@ namespace solum.core
         const string DEFAULT_SERVER_CONFG = "./server.config.json";
         const bool PROMPT_TO_START = false;
 
-        public Server()
+        protected Server()
         {
             this.Storage = new StorageEngine();
             this.Services = new List<Service>();
