@@ -1,0 +1,18 @@
+﻿<table class="table table-bordered table-responsive" id="{{id}}">
+    <thead>
+        <tr>
+            {{#columns}}
+            <th>{{name}}</th>
+            {{/columns}}
+        </tr>
+    </thead>
+    <tbody>
+        {{#rows}}
+        <tr>
+            {{#values}}
+            <td>{{{value}}}</td>
+            {{/values}}
+        </tr>
+        {{/rows}}
+    </tbody>
+</table>

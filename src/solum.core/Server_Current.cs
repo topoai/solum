@@ -14,8 +14,8 @@ namespace solum.core
     partial class Server
     {
         #region Current (singleton) implementation
-        public static object _locker = new object();
-        public static Server _instance;
+        static object _locker = new object();
+        static Server _instance;
         public static Server Current
         {
             get
@@ -26,7 +26,10 @@ namespace solum.core
                     {
                         if (_instance == null)
                         {
-                            _instance = LoadConfig(DEFAULT_SERVER_CONFG);
+                            if (File.Exists(DEFAULT_SERVER_CONFG))
+                                RunServer(DEFAULT_SERVER_CONFG);
+                            else
+                                _instance = new Server();
                         }
                     }
                 }
@@ -40,14 +43,17 @@ namespace solum.core
         /// </summary>
         /// <param name="configPath"></param>
         /// <returns></returns>
-        public static Server LoadConfig(string configPath)
+        public static void RunServer(string configPath)
         {
-            var json = File.ReadAllText(configPath);
-            var server = json.FromJson<Server>();
+            if (_instance != null)
+                throw new Exception("Server already initialized.");
 
-            return server;
+            var json = File.ReadAllText(configPath);
+            _instance = json.FromJson<Server>();
+
+            RunServer();
         }
-        public static void RunDefaultServer(bool promptToStart = PROMPT_TO_START)
+        public static void RunServer(bool promptToStart = PROMPT_TO_START)
         {
             using (var server = Server.Current)
             {
@@ -58,37 +64,43 @@ namespace solum.core
                 Console.ResetColor();
 
                 // ** Add hook to cleanup storage if the program quits unexpectedly
-#if LINUX
-                Console.CancelKeyPress += delegate
+                switch (SystemInfo.RunningPlatform())
                 {
-                    Console.ForegroundColor = ConsoleColor.Red;
-                    Console.WriteLine("***********************************");
-                    Console.WriteLine("********* CTRL+C Detected *********");
-                    Console.WriteLine("***********************************");
-                    Console.ResetColor();
+                    case SystemInfo.Platform.Mac:
+                    case SystemInfo.Platform.Linux:
+                        Console.CancelKeyPress += delegate
+                        {
+                            Console.ForegroundColor = ConsoleColor.Red;
+                            Console.WriteLine("***********************************");
+                            Console.WriteLine("********* CTRL+C Detected *********");
+                            Console.WriteLine("***********************************");
+                            Console.ResetColor();
 
-                    // This must cleanup all database resources
-                    // TODO: Send "HALT" signal to all services
-                    server.Storage.Close();
-                };
-#endif
-#if !LINUX
-                // ** Add hook to cleanup storage if the program quits unexpectedly                                
-                ProgramExit.SetConsoleCtrlHandler(new solum.extensions.ProgramExit.HandlerRoutine(ctrl =>
-                {
-                    Console.ForegroundColor = ConsoleColor.Red;
-                    Console.WriteLine("***********************************");
-                    Console.WriteLine("********* CTRL+C Detected *********");
-                    Console.WriteLine("***********************************");
-                    Console.ResetColor();
+                            // This must cleanup all database resources
+                            // TODO: Send "HALT" signal to all services
+                            server.Storage.Close();
+                        };
 
-                    // This must cleanup all database resources
-                    // TODO: Send "HALT" signal to all services
-                    server.Storage.Close();
+                        break;
+                    case SystemInfo.Platform.Windows:
+                        // ** Add hook to cleanup storage if the program quits unexpectedly                                
+                        ProgramExit.SetConsoleCtrlHandler(new solum.extensions.ProgramExit.HandlerRoutine(ctrl =>
+                        {
+                            Console.ForegroundColor = ConsoleColor.Red;
+                            Console.WriteLine("***********************************");
+                            Console.WriteLine("********* CTRL+C Detected *********");
+                            Console.WriteLine("***********************************");
+                            Console.ResetColor();
 
-                    return true;
-                }), true);
-#endif
+                            // This must cleanup all database resources
+                            // TODO: Send "HALT" signal to all services
+                            server.Storage.Close();
+
+                            return true;
+                        }), true);
+                        break;
+                }
+
                 // ** Prompt the user to start the server
                 if (promptToStart)
                 {
@@ -116,6 +128,6 @@ namespace solum.core
                 Console.ReadLine();
                 server.Stop();
             }
-        }        
+        }
     }
 }
