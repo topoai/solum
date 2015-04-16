@@ -6,7 +6,7 @@ set orig_path=%cd%
 
 REM -- Get the current date time in the format YYYY-MM-DD
 set current_date=%DATE:~10,4%-%DATE:~4,2%-%DATE:~7,2%
-set release_dir=release\%current_date%
+set release_dir=release\current
 
 REM -- Update with contents from bin folder and copy to release directory
 lib\utils\echoc 2 Creating release binaries...
@@ -23,7 +23,7 @@ REM -- Compress bin and lib to specific zip files
 lib\utils\echoc 2 Compressing binary release...
 del %release_dir%\%current_date%-solum-bin.zip
 cd %release_dir%
-%orig_path%\lib\utils\zip -r %current_date%-solum-bin.zip bin\* -x data
+%orig_path%\lib\utils\zip -r %current_date%-solum-bin.zip bin\*
 cd %orig_path%
 
 lib\utils\echoc 2 Compressing lib release...
