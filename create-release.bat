@@ -32,6 +32,23 @@ cd %release_dir%
 %orig_path%\lib\utils\zip -r ..\%current_date%-solum-lib.zip lib\*
 cd %orig_path%
 
+REM -- Update DataCollectors if present
+if exist ..\datacollectors\lib (
+	echo.
+	lib\utils\echoc 2 Found data collectors project...
+	set update_data_collectors=y
+	set /p update_data_collectors="Update data collectors solum library? [y]/n "
+
+	if "%update_data_collectors:~0,1%" equ "y" (
+		lib\utils\echoc 2 Copying release\%current_date%-solum-lib.zip...
+		copy /y /v release\%current_date%-solum-lib.zip ..\datacollectors\lib\
+		
+		lib\utils\echoc 2 Extracting library...
+		lib\utils\unzip -o ..\datacollectors\lib\*-solum*.zip -d ..\datacollectors\lib\solum
+	)
+)
+
+
 REM -- Display git status
 git status
 

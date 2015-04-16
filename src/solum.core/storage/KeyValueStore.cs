@@ -127,6 +127,14 @@ namespace solum.core.storage
             return true;
         }
 
+        public bool ContainsKey(string key)
+        {
+            ensureOpened();
+
+            int id;
+            return m_index.Get(key, out id);
+        }
+
         /// <summary>
         /// Helper method to ensure the database is Open() before writing or reading
         /// </summary>
