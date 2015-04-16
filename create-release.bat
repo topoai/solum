@@ -23,13 +23,13 @@ REM -- Compress bin and lib to specific zip files
 lib\utils\echoc 2 Compressing binary release...
 del %release_dir%\%current_date%-solum-bin.zip
 cd %release_dir%
-%orig_path%\lib\utils\zip -r %current_date%-solum-bin.zip bin\*
+%orig_path%\lib\utils\zip -r ..\%current_date%-solum-bin.zip bin\*
 cd %orig_path%
 
 lib\utils\echoc 2 Compressing lib release...
 del %release_dir%\%current_date%-solum-lib.zip
 cd %release_dir%
-%orig_path%\lib\utils\zip -r %current_date%-solum-lib.zip lib\*
+%orig_path%\lib\utils\zip -r ..\%current_date%-solum-lib.zip lib\*
 cd %orig_path%
 
 REM -- Display git status
@@ -38,11 +38,11 @@ git status
 REM -- Git Add
 echo.
 set git_add=y
-set /p git_add="Git add the release folder? [y]/n "
+set /p git_add="Git add release? [y]/n "
 
 if "%git_add:~0,1%" equ "y" (
 	lib\utils\echoc 2 Adding...
-	git add -Af %release_dir%
+	git add -Af .\release\*
 ) else (
 	goto COMPLETED
 )
