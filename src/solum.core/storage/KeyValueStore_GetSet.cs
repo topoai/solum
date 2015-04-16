@@ -21,14 +21,14 @@ namespace solum.core.storage
         /// </summary>
         /// <param name="key"></param>
         /// <param name="value"></param>
-        public void Set(string key, string value)
+        public long Set(string key, string value)
         {
             // ** Convert
             var encoding = SystemSettings.Encoding;
             var bytes = encoding.GetBytes(value);
 
             // ** Store
-            Set(key, bytes);
+            return Set(key, bytes);
         }
         /// <summary>
         /// Retuns a string value encoded using the 
@@ -62,12 +62,12 @@ namespace solum.core.storage
         /// </summary>
         /// <param name="key"></param>
         /// <param name="value"></param>
-        public void Set(string key, DateTime value)
+        public long Set(string key, DateTime value)
         {
             var ticks = value.Ticks;
             var bytes = BitConverter.GetBytes(ticks);
 
-            Set(key, bytes);
+            return Set(key, bytes);
         }
         /// <summary>
         /// Returns contents by deserializing the datetime
@@ -98,13 +98,13 @@ namespace solum.core.storage
         /// <typeparam name="T"></typeparam>
         /// <param name="key"></param>
         /// <param name="value"></param>
-        public void Set<T>(string key, T value)
+        public long Set<T>(string key, T value)
         {
             // ** Serialize the value
             var json = value.ToJson(indent: false, includeTypes: true);
 
             // ** Store the value as a JSON string
-            Set(key, json);
+            return Set(key, json);
         }
 
         public bool Get<T>(string key, out T value)
