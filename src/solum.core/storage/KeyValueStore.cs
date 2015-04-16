@@ -73,60 +73,69 @@ namespace solum.core.storage
         {
             ensureOpened();
 
-            // ** Check if the key already exits
-            int existingId = -1;
-            if (m_index.Get(key, out existingId))
+            lock (m_index)
             {
-                // Delete the existing record before adding
-                m_database.Delete(existingId);
+                // ** Check if the key already exits
+                int existingId = -1;
+                if (m_index.Get(key, out existingId))
+                {
+                    // Delete the existing record before adding
+                    m_database.Delete(existingId);
+                }
+
+                // ** Store the new value as a record            
+                var record = m_database.Store(value);
+
+                // ** Index the record id with the key
+                var id = record.Id;
+
+                if (id > int.MaxValue)
+                    throw new NotSupportedException("Id's larger than {0} are not supported.".format(id));
+
+                m_index.Set(key, (int)id);
+
+                return id;
             }
-
-            // ** Store the new value as a record            
-            var record = m_database.Store(value);
-
-            // ** Index the record id with the key
-            var id = record.Id;
-
-            if (id > int.MaxValue)
-                throw new NotSupportedException("Id's larger than {0} are not supported.".format(id));
-
-            m_index.Set(key, (int)id);
-
-            return id;
         }
         public bool Get(string key, out byte[] value)
         {
             ensureOpened();
 
-            value = null;
+            lock (m_index)
+            {
+                value = null;
 
-            // ** Search the index for the key
-            int id;
-            if (!m_index.Get(key, out id))
-                return false;
+                // ** Search the index for the key
+                int id;
+                if (!m_index.Get(key, out id))
+                    return false;
 
-            // ** Read the record from the database
-            var record = m_database.ReadRecord(id);
-            value = record.Data;
+                // ** Read the record from the database
+                var record = m_database.ReadRecord(id);
+                value = record.Data;
 
-            return true;
+                return true;
+            }
         }        
         public bool Remove(string key)
         {
             ensureOpened();
 
-            // ** Search for the key in the index
-            int id;
-            if (m_index.Get(key, out id) == false)
-                return false;
+            lock (m_index)
+            {
+                // ** Search for the key in the index
+                int id;
+                if (m_index.Get(key, out id) == false)
+                    return false;
 
-            // ** Remove the key from the database
-            m_database.Delete(id);
-            
-            // ** Remove the key from the index
-            m_index.RemoveKey(key);
+                // ** Remove the key from the database
+                m_database.Delete(id);
 
-            return true;
+                // ** Remove the key from the index
+                m_index.RemoveKey(key);
+
+                return true;
+            }
         }
 
         public bool ContainsKey(string key)
@@ -134,7 +143,9 @@ namespace solum.core.storage
             ensureOpened();
 
             int id;
-            return m_index.Get(key, out id);
+
+            lock (m_index)
+                return m_index.Get(key, out id);
         }
 
         // TODO: Remove these methods and replace with a query
