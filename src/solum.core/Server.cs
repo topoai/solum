@@ -15,13 +15,13 @@ namespace solum.core
         const string DEFAULT_SERVER_CONFG = "./server.config.json";
         const bool PROMPT_TO_START = false;
 
-        public Server()
+        protected Server()
         {
             this.Storage = new StorageEngine();
             this.Services = new List<Service>();
         }
 
-        protected StorageEngine Storage { get; private set; }
+        public StorageEngine Storage { get; private set; }
         [JsonProperty("services")]
         protected List<Service> Services { get; private set; }
 
@@ -67,16 +67,6 @@ namespace solum.core
             base.OnUnload();
         }
 
-        public Database OpenDatabase(string databaseName)
-        {
-            var database = Storage.OpenDatabase(databaseName);
-            return database;
-        }
-        public KeyValueStore OpenKeyValueStore(string databaseName)
-        {
-            var database = Storage.OpenKeyValueStore(databaseName);
-            return database;
-        }
 
         /// <summary>
         /// Get a loaded Service by Type.

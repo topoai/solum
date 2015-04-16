@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace solum.extensions
 {
-#if !LINUX
+
     public static class ProgramExit
     {
         #region unmanaged
@@ -32,5 +32,4 @@ namespace solum.extensions
         }
         #endregion
     }
-#endif
 }
