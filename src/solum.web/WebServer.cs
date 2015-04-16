@@ -2,6 +2,7 @@
 using solum.core;
 using solum.core.http;
 using solum.core.http.handlers;
+using solum.core.storage;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -13,6 +14,11 @@ namespace solum.web
 {
     public class WebServer : Server
     {
+        /// <summary>
+        /// The name of the database to use to store session logs
+        /// </summary>
+        const string SESSION_LOGS = "session-logs";
+
         WebServer()
         {
             this.Modules = new List<WebModule>();
@@ -33,9 +39,14 @@ namespace solum.web
         #endregion
 
         WebServerListener m_listener;
+        KeyValueStore m_session_logs;
 
         protected override void OnLoad()
         {
+            // ** Open to store session logs and statistics
+            Log.Debug("Opening session log... {0}", SESSION_LOGS);
+            m_session_logs = Server.Current.Storage.OpenKeyValueStore(SESSION_LOGS);
+
             // ** Load the listener as a service
             Log.Debug("Creating HTTP Listener... {0}", Address);
             m_listener.Addresses.Add(Address);

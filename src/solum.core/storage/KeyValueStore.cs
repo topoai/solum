@@ -21,16 +21,17 @@ namespace solum.core.storage
             this.Name = name;
             this.IsOpened = false;
             this.DataDirectory = dataDirectory;
-            this.KeySize = DEFAULT_KEY_SIZE;
-            this.PageSize = DEFAULT_PAGE_SIZE;
+            this.m_keysize = DEFAULT_KEY_SIZE;
+            this.m_pagesize = DEFAULT_PAGE_SIZE;
         }
 
         public string Name { get; private set; }
         public DirectoryInfo DataDirectory { get; private set; }
         public bool IsOpened { get; private set; }
-        public byte KeySize { get; private set; }
-        public ushort PageSize { get; private set; }
-
+        public long NumRecords { get { return m_database.NumRecords; } }
+        
+        byte m_keysize;
+        ushort m_pagesize;
         Database m_database;
         MGIndex<string> m_index; // TODO: This should support long's
 
@@ -50,7 +51,7 @@ namespace solum.core.storage
             Log.Debug("Opening the index...");
             var indexPath = Path.Combine(DataDirectory.FullName);
             var indexFileName = "{0}.idx".format(Name);
-            this.m_index = new MGIndex<string>(indexPath, indexFileName, KeySize, PageSize, false);
+            this.m_index = new MGIndex<string>(indexPath, indexFileName, m_keysize, m_pagesize, false);
 
             this.IsOpened = true;
         }
