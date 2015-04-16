@@ -1,4 +1,5 @@
-﻿using System;
+﻿using System.Threading;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -22,6 +23,18 @@ namespace solum.core.http
             }
 
             var response = await client.GetAsync(url);
+            var content = await response.Content.ReadAsStringAsync();
+
+            return content;
+        }
+
+        public static async Task<string> HttpGetAsync(this string url, TimeSpan timeout)
+        {
+            var client = new HttpClient();
+            
+            var timeoutCancelation = new CancellationTokenSource(timeout);
+            
+            var response = await client.GetAsync(url, timeoutCancelation.Token);
             var content = await response.Content.ReadAsStringAsync();
 
             return content;
