@@ -66,7 +66,7 @@ namespace solum.core.storage
         }
         public Record ReadRecord(long id)
         {
-            using (headerReadLock)
+            //using (headerReadLock)
             using (dataReadLock)
             {
                 // ** Read the header
