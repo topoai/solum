@@ -1,4 +1,5 @@
 ﻿using HandlebarsDotNet;
+using Newtonsoft.Json;
 using solum.core;
 using System;
 using System.Collections.Generic;
@@ -18,6 +19,7 @@ namespace solum.web
             this.TemplatesDirectory = templatesDirectory;
         }
 
+        [JsonProperty("templates-directory")]
         public string TemplatesDirectory { get; private set; }
 
         public void RegisterTemplates()

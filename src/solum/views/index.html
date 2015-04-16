@@ -5,7 +5,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description" content="Solum Admin Panel" />
-    <meta name="author" content="" />
+    <meta name="author" content="Brad Serbu" />
     <title>Solum | Dashboard</title>
     {{> header-assets}}
 </head>
@@ -196,6 +196,11 @@
     </div>
     <script type="text/javascript">
         jQuery(document).ready(function ($) {
+            // ** Activate sidebar menu
+            $('#sidebar_dashboard').addClass('active');
+            $('#sidebar_dashboard').addClass('opened');
+            $('#sidebar_dashboard_overview').addClass('active');
+
             // Sparkline Charts
             $('.inlinebar').sparkline('html', { type: 'bar', barColor: '#ff6264' });
             $('.inlinebar-2').sparkline('html', { type: 'bar', barColor: '#445982' });

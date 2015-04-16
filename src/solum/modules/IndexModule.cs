@@ -30,8 +30,6 @@ namespace solum.modules
             var indexView = View.FromFile("views/index.html");            
             Get("/index/", indexView);
             Get("/", indexView);
-
-            Get("/databases/", View.FromFile("views/databases.html"));
         }
     }
 }

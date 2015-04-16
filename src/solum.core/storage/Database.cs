@@ -102,7 +102,7 @@ namespace solum.core.storage
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        long getHeaderPosition(long id)
+        static long getHeaderPosition(long id)
         {
             return HeaderPositions.DATA_OFFSET + RecordHeader.SIZE_OF * (id - 1);
         }
