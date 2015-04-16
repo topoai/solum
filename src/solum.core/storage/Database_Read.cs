@@ -12,7 +12,7 @@ namespace solum.core.storage
         #region iterators
         public IEnumerable<Record> Records(bool includeDeleted = false)
         {
-            // using (readLock)
+            using (dataReadLock)
             {
                 dataStream.Position = DataPositions.DATA_OFFSET;
                 long recordCount = 0;
@@ -33,7 +33,7 @@ namespace solum.core.storage
         }
         public IEnumerable<RecordHeader> Headers(bool includeDeleted = false)
         {
-            // using (readLock)
+            using (headerReadLock)
             {
                 headerStream.Position = HeaderPositions.DATA_OFFSET;
                 long recordCount = 0;
@@ -66,6 +66,7 @@ namespace solum.core.storage
         }
         public Record ReadRecord(long id)
         {
+            using (headerReadLock)
             using (dataReadLock)
             {
                 // ** Read the header
