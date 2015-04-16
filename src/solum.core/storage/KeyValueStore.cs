@@ -69,7 +69,7 @@ namespace solum.core.storage
             Log.Debug("Shutting down the index...");
             m_index.Shutdown();
         }
-        public void Set(string key, byte[] value)
+        public long Set(string key, byte[] value)
         {
             ensureOpened();
 
@@ -91,6 +91,8 @@ namespace solum.core.storage
                 throw new NotSupportedException("Id's larger than {0} are not supported.".format(id));
 
             m_index.Set(key, (int)id);
+
+            return id;
         }
         public bool Get(string key, out byte[] value)
         {
@@ -109,7 +111,7 @@ namespace solum.core.storage
 
             return true;
         }        
-        public bool Delete(string key)
+        public bool Remove(string key)
         {
             ensureOpened();
 
@@ -133,6 +135,18 @@ namespace solum.core.storage
 
             int id;
             return m_index.Get(key, out id);
+        }
+
+        // TODO: Remove these methods and replace with a query
+        public IEnumerable<Record> Records(bool includeDeleted = false)
+        {
+            return m_database.Records(includeDeleted);
+        }
+
+        // TODO: Remove these methods and replace with a query
+        public IEnumerable<RecordHeader> Headers(bool includeDeleted = false)
+        {
+            return m_database.Headers(includeDeleted);
         }
 
         /// <summary>
