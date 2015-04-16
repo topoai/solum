@@ -25,7 +25,7 @@ namespace solum
         {
             using (var server = Server.Current)
             {
-                var store = server.OpenKeyValueStore("test-db");
+                var store = server.Storage.OpenKeyValueStore("test-db");
                 store.Set("name", "Brad Serbu");
 
                 string value;

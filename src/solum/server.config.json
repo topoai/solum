@@ -12,6 +12,10 @@
     "static-directories": {
         "/assets/": "./assets/"
     },
+    "view-manager": {
+        "$type": "solum.web.ViewManager, solum.web",
+        "templates-directory": "./templates/"
+    },
     "services": [
 
     ]

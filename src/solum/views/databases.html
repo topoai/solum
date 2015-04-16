@@ -29,6 +29,26 @@
                 <div class="col-sm-12">
                     <div class="panel panel-default">
                         <div class="panel-heading">
+                            <div class="panel-title">Key Value Stores</div>
+
+                            <div class="panel-options">
+                                <a href="#sample-modal" data-toggle="modal" data-target="#sample-modal-dialog-1" class="bg"><i class="entypo-cog"></i></a>
+                                <a href="#" data-rel="collapse"><i class="entypo-down-open"></i></a>
+                                <a href="#" data-rel="reload"><i class="entypo-arrows-ccw"></i></a>
+                                <a href="#" data-rel="close"><i class="entypo-cancel"></i></a>
+                            </div>
+                        </div>
+                        {{#keyValueStores}}
+                        {{> table-template}}
+                        {{/keyValueStores}}
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-sm-12">
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
                             <div class="panel-title">Databases</div>
 
                             <div class="panel-options">
@@ -38,24 +58,9 @@
                                 <a href="#" data-rel="close"><i class="entypo-cancel"></i></a>
                             </div>
                         </div>
-                        <table class="table table-bordered table-responsive" id="databases_table">
-                            <thead>
-                                <tr>
-                                    <th>#</th>
-                                    <th>Name</th>
-                                    <th>Records</th>
-                                    <th>Size</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td>1</td>
-                                    <td>Yik Yak Users</td>
-                                    <td>65</td>
-                                    <td class="text-center">10MB</td>
-                                </tr>
-                            </tbody>
-                        </table>
+                        {{#databases}}
+                            {{> table-template}}
+                        {{/databases}}
                     </div>
                 </div>
             </div>
