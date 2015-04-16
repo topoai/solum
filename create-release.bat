@@ -21,13 +21,13 @@ lib\ILMerge\ILMerge.exe /v4 /out:%release_dir%\lib\solumlib.dll /wildcards bin\s
 
 REM -- Compress bin and lib to specific zip files
 lib\utils\echoc 2 Compressing binary release...
-del %release_dir%\%current_date%-solum-bin.zip
+del %release_dir%\..\%current_date%-solum-bin.zip
 cd %release_dir%
 %orig_path%\lib\utils\zip -r ..\%current_date%-solum-bin.zip bin\*
 cd %orig_path%
 
 lib\utils\echoc 2 Compressing lib release...
-del %release_dir%\%current_date%-solum-lib.zip
+del %release_dir%\..\%current_date%-solum-lib.zip
 cd %release_dir%
 %orig_path%\lib\utils\zip -r ..\%current_date%-solum-lib.zip lib\*
 cd %orig_path%
