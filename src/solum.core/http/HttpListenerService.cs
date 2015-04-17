@@ -12,6 +12,7 @@ using System.Linq;
 using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Threading.Tasks.Dataflow;
 
 namespace solum.core.http
 {
@@ -53,6 +54,13 @@ namespace solum.core.http
         /// </summary>
         [JsonProperty("handlers")]
         public List<IHttpRequestHandler> Handlers { get; private set; }
+        /// <summary>
+        /// Sets the maximum number of active requests at any given time. 
+        /// New requests will block once this limit is received.
+        /// Setting to zero means unbounded.
+        /// </summary>
+        [JsonProperty("max-active-requests", DefaultValueHandling=DefaultValueHandling.Populate)]
+        public int MaxActiveRequests { get; private set; }        
         #endregion
 
         /// <summary>
@@ -70,16 +78,33 @@ namespace solum.core.http
         /// <summary>
         /// Concurrent
         /// </summary>
-        ConcurrentDictionary<long, Task> m_active_requests;
+        //ConcurrentDictionary<long, Task> m_active_requests;
         /// <summary>
         /// Counter of requests received during the lifetime of this service.
         /// </summary>
         long m_requests_received;
+        /// <summary>
+        /// Provides in order handling of http requests.
+        /// Can be parallized by setting MaxActiveRequests > 1
+        /// </summary>
+        ActionBlock<HttpContext> m_handle_context_block;
+        // ActionBlock<HttpContext> m_complete_context;
 
         protected override void OnLoad()
         {
             if (!HttpListener.IsSupported)
                 throw new Exception("HttpListener class is not supported by this OS.");
+
+            // *** Initialize context request queue
+            var options = new ExecutionDataflowBlockOptions();
+            //if (MaxActiveRequests > 0)
+            //    options.BoundedCapacity = MaxActiveRequests;
+
+            // *** Set number of parallel workers to the size of the processor
+            // TODO: Make configurable
+            options.MaxDegreeOfParallelism = MaxActiveRequests;
+
+            m_handle_context_block = new ActionBlock<HttpContext>(context => HandleRequestAsync(context), options);
 
             base.OnLoad();
         }
@@ -128,11 +153,11 @@ namespace solum.core.http
             m_stopReceived = false;
 
             // ** Keep a list of active requests
-            m_active_requests = new ConcurrentDictionary<long, Task>();
+            // m_active_requests = new ConcurrentDictionary<long, Task>();
 
             // ** Start the request handler
             Log.Debug("Starting the request handler...");
-            m_receiveRequestTask = HandleRequests();
+            m_receiveRequestTask = HandleRequestsAsync();
 
             base.OnStart();
         }
@@ -145,11 +170,19 @@ namespace solum.core.http
             // m_receiveRequestTask.Wait();
 
             // ** Wait for all active requests to stop
-            var numActiveRequests = m_active_requests.Count;
+            //var numActiveRequests = m_active_requests.Count;
+            //if (numActiveRequests > 0)
+            //{
+            //    Log.Warn("Waiting for {0} active requests to complete.", m_active_requests.Count);
+            //    Task.WaitAll(m_active_requests.Values.ToArray());
+            //}
+
+            var numActiveRequests = m_handle_context_block.InputCount;
             if (numActiveRequests > 0)
             {
-                Log.Warn("Waiting for {0} active requests to complete.", m_active_requests.Count);
-                Task.WaitAll(m_active_requests.Values.ToArray());
+                Log.Warn("Waiting for {0} active requests to complete.", m_handle_context_block.InputCount);
+                m_handle_context_block.Complete();
+                m_handle_context_block.Completion.Wait();
             }
 
             // ** Stop the http listener
@@ -180,7 +213,7 @@ namespace solum.core.http
             Addresses.ForEach(address => Log.Info("Listening on address: {0}", address));
         }
 
-        async Task HandleRequests()
+        async Task HandleRequestsAsync()
         {
             m_requests_received = 0;
             // ** Create a background thread
@@ -198,8 +231,29 @@ namespace solum.core.http
                 Log.Trace("Request #{0:N0} received...", requestNum);
                 // TODO: Use a dataprocess here to queue up requests and control the number of active tasks and their completion
                 // Handle the request in the background and move ont o rec
-                var handleResponseTask = Task.Run(() => HandleRequestAsync(requestNum, context)).ContinueWith(task =>
-                {   
+                var httpContext = new HttpContext(requestNum, context);
+
+                // ** Post the current context to the queue and move onto accept the next request.
+                m_handle_context_block.Post(httpContext);
+
+
+                /*
+                var handleResponseTask = Task.Run(async () =>
+                {                    
+                    try
+                    {
+                        await HandleRequestAsync(context);
+                    }
+                    catch (Exception ex)
+                    {
+                        Log.FatalException("Fatal error handling request: #{0}".format(requestNum), ex);
+                    }
+                })*/
+
+                /*
+                //  ** Remove the task from the active queue
+                .ContinueWith(task =>
+                {                    
                     var taskResquestNum = task.Result;
 
                     Task _;
@@ -210,30 +264,21 @@ namespace solum.core.http
                 // ** Add this to the list of active tasks
                 if (!m_active_requests.TryAdd(requestNum, handleResponseTask))
                     Log.Error("Error adding request #{0:N0} to active requests.", requestNum);
+                 */
             }
         }
-        async Task<long> HandleRequestAsync(long requestNum, HttpListenerContext context)
-        {
+        async Task<long> HandleRequestAsync(HttpContext httpContext)
+        {            
+            var requestNum = httpContext.RequestNum;
+            var context = httpContext.Context;
             var timer = Stopwatch.StartNew();
 
-            Log.Trace("--------------------------------");            
-            Log.Trace("- Request:Number.............. {0:N0}", requestNum);
-            Log.Trace("- Request:Url................. {0}", context.Request.RawUrl);
-            Log.Trace("- Request:Content-Encoding.... {0}", context.Request.ContentEncoding);
-            Log.Trace("- Request:Content-Type........ {0}", context.Request.HttpMethod);
-            Log.Trace("- Request:Content-Length...... {0}", context.Request.ContentLength64);
-
-            /*
-            if (request.HttpMethod.Equals("POST", StringComparison.InvariantCultureIgnoreCase))
-            {
-                Log.Trace("Reading content...");
-                // ** Read the contents of the stream
-                using (var reader = new StreamReader(request.InputStream))
-                {
-                    var content = await reader.ReadToEndAsync();
-                    Log.Debug("- Content... \n{0}", content);
-                }
-            }*/
+            Log.Debug("--------------------------------");
+            Log.Debug("- Request:Number.............. {0:N0}", requestNum);
+            Log.Debug("- Request:Url................. {0}", context.Request.RawUrl);
+            Log.Debug("- Request:Content-Encoding.... {0}", context.Request.ContentEncoding);
+            Log.Debug("- Request:Content-Type........ {0}", context.Request.HttpMethod);
+            Log.Debug("- Request:Content-Length...... {0}", context.Request.ContentLength64);
 
             // ** Check if we can find a handler for this request
             var request = context.Request;
@@ -244,7 +289,7 @@ namespace solum.core.http
             {
                 // ** Load the default handler since we have none
                 // TODO: Return 404
-                
+
                 //response.Write("text/plain", responseString);
                 Log.Warn("No Handler found for request: {0}", request.RawUrl);
                 response.StatusCode = 404;
@@ -257,7 +302,7 @@ namespace solum.core.http
                     if (handler.AsyncSupported)
                         await handler.HandleRequestAsync(request, response);
                     else
-                        handler.HandleRequest(request, response);                    
+                        handler.HandleRequest(request, response);
                 }
                 catch (HttpListenerException ex)
                 {
@@ -275,11 +320,11 @@ namespace solum.core.http
             Log.Trace("Closing response...");
             response.OutputStream.Close();
 
-            Log.Trace("--------------------------------");
-            Log.Trace("- Response:Content-Encoding... {0}", context.Response.ContentEncoding);
-            Log.Trace("- Response:Content-Type....... {0}", context.Response.ContentType);
-            Log.Trace("- Response:Content-Length..... {0}", context.Response.ContentLength64);
-            Log.Trace("--------------------------------");
+            Log.Debug("--------------------------------");
+            Log.Debug("- Response:Content-Encoding... {0}", context.Response.ContentEncoding);
+            Log.Debug("- Response:Content-Type....... {0}", context.Response.ContentType);
+            Log.Debug("- Response:Content-Length..... {0}", context.Response.ContentLength64);
+            Log.Debug("--------------------------------");
 
             timer.Stop();
             Log.Trace("Request {0:N0} Completed ({1:N2}ms)", requestNum, timer.ElapsedMilliseconds);
