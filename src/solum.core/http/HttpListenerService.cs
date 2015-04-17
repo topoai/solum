@@ -109,7 +109,7 @@ namespace solum.core.http
             // *** Set number of parallel workers to the size of the processor
             // TODO: Make configurable
             Log.Debug("Max active requests: {0}", MaxActiveRequests);
-            // options.BoundedCapacity = MaxActiveRequests;
+            options.BoundedCapacity = MaxActiveRequests;
             options.MaxDegreeOfParallelism = MaxActiveRequests;
 
             m_receive_request_block = new BufferBlock<HttpContext>();
