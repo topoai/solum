@@ -252,9 +252,14 @@ namespace solum.core.http
             var context = httpContext.Context;
             var processTimer = Stopwatch.StartNew();
 
-            Log.Debug("--------------------------------");            
-            Log.Debug("- Request:Number.............. {0:N0}", requestNum);
-            Log.Debug("- Request:Queued.............. {0:N0}", httpContext.Elapsed);
+            Log.Debug("--------------------------------");
+            Log.Debug("- Request:Number.............. #{0:N0}", requestNum);
+
+            if (httpContext.Elapsed.TotalMilliseconds > 1000)
+                Log.Warn("- Request:Queued.............. {0:N2}ms", httpContext.Elapsed.TotalMilliseconds);
+            else
+                Log.Debug("- Request:Queued.............. {0:N2}ms", httpContext.Elapsed.TotalMilliseconds);
+
             Log.Debug("- Request:Url................. {0}", context.Request.RawUrl);
             Log.Debug("- Request:Content-Encoding.... {0}", context.Request.ContentEncoding);
             Log.Debug("- Request:Content-Type........ {0}", context.Request.HttpMethod);
@@ -307,11 +312,17 @@ namespace solum.core.http
             response.OutputStream.Close();
 
             processTimer.Stop();
-            httpContext.Complete();            
+            httpContext.Complete();
             Log.Debug("------------------------------------------");
             Log.Debug("- Request..................... #{0}", requestNum);
-            Log.Debug("- Request:ElapsedTime......... {0}ms", httpContext.Elapsed);
-            Log.Debug("- Request:ProcessTime......... {0}ms", processTimer.ElapsedMilliseconds);
+
+            var elapsedTimeMilliseconds = httpContext.Elapsed.TotalMilliseconds;
+            if (elapsedTimeMilliseconds > 1000)
+                Log.Warn("- Request:ElapsedTime......... {0:N2}ms", httpContext.Elapsed.TotalMilliseconds);
+            else
+                Log.Debug("- Request:ElapsedTime......... {0:N2}ms", httpContext.Elapsed.TotalMilliseconds);
+
+            Log.Debug("- Request:ProcessTime......... {0:N2}ms", processTimer.ElapsedMilliseconds);
             Log.Debug("- Response:Content-Encoding... {0}", context.Response.ContentEncoding);
             Log.Debug("- Response:Content-Type....... {0}", context.Response.ContentType);
             Log.Debug("- Response:Content-Length..... {0}", context.Response.ContentLength64);
