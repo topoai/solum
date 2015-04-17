@@ -47,14 +47,18 @@ namespace solum.core.http
             }
             catch (FileNotFoundException ex)
             {
+                Log.ErrorException("Error handling request: {0}".format(ex), ex);
+
                 response.StatusCode = 404;
                 response.StatusDescription = ex.Message.RemoveControlCharacters();
             }
-            catch (Exception ex)
-            {                
-                response.StatusCode = 500;
-                response.StatusDescription = "An error occurred processing your request: {0}".format(ex.Message).RemoveControlCharacters();
-            }
+            //catch (Exception ex)
+            //{
+            //    Log.ErrorException("Error handling request: {0}".format(ex), ex);
+
+            //    response.StatusCode = 500;
+            //    response.StatusDescription = "An error occurred processing your request: {0}".format(ex.Message).RemoveControlCharacters();
+            //}
         }
 
         protected abstract bool OnAcceptRequest(HttpListenerRequest request);
