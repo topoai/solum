@@ -84,6 +84,10 @@ namespace solum.core.http
         /// </summary>
         long m_requests_received;
         /// <summary>
+        /// Incomming queue for active connections
+        /// </summary>
+        BufferBlock<HttpContext> m_receive_context_block;
+        /// <summary>
         /// Provides in order handling of http requests.
         /// Can be parallized by setting MaxActiveRequests > 1
         /// </summary>
@@ -102,9 +106,17 @@ namespace solum.core.http
 
             // *** Set number of parallel workers to the size of the processor
             // TODO: Make configurable
+            options.BoundedCapacity = MaxActiveRequests;
             options.MaxDegreeOfParallelism = MaxActiveRequests;
 
+            m_receive_context_block = new BufferBlock<HttpContext>();
             m_handle_context_block = new ActionBlock<HttpContext>(context => HandleRequestAsync(context), options);
+
+            m_receive_context_block.LinkTo(m_handle_context_block, new DataflowLinkOptions()
+            {
+                PropagateCompletion = true
+            });
+
 
             base.OnLoad();
         }
@@ -180,8 +192,10 @@ namespace solum.core.http
             var numActiveRequests = m_handle_context_block.InputCount;
             if (numActiveRequests > 0)
             {
-                Log.Warn("Waiting for {0} active requests to complete.", m_handle_context_block.InputCount);
-                m_handle_context_block.Complete();
+                Log.Warn("Waiting for {0} active requests to complete.", m_receive_context_block.Count);
+                m_receive_context_block.Complete();
+                //Log.Warn("Waiting for {0} active requests to complete.", m_handle_context_block.InputCount);
+                //m_handle_context_block.Complete();
                 m_handle_context_block.Completion.Wait();
             }
 
@@ -223,6 +237,9 @@ namespace solum.core.http
                 // ** Receive the next request
                 // HttpListenerContext context;
 
+                if (m_receive_context_block.Count > 0 || m_handle_context_block.InputCount > 0)
+                    Log.Debug("{0}->{1} pending requests...", m_receive_context_block.Count, m_handle_context_block.InputCount);
+
                 Log.Trace("Waiting for request...");
                 var context = await m_listener.GetContextAsync();
 
@@ -234,7 +251,11 @@ namespace solum.core.http
                 var httpContext = new HttpContext(requestNum, context);
 
                 // ** Post the current context to the queue and move onto accept the next request.
-                m_handle_context_block.Post(httpContext);
+                //if (!m_handle_context_block.Post(httpContext))
+                if (!m_receive_context_block.Post(httpContext))
+                {
+                    throw new Exception("ERROR: Request BUFFER Full!!!");
+                }
 
 
                 /*
@@ -328,6 +349,9 @@ namespace solum.core.http
 
             timer.Stop();
             Log.Trace("Request {0:N0} Completed ({1:N2}ms)", requestNum, timer.ElapsedMilliseconds);
+            
+            if (m_receive_context_block.Count > 0 || m_handle_context_block.InputCount > 0)
+                Log.Debug("{0}->{1} pending requests...", m_receive_context_block.Count, m_handle_context_block.InputCount);
 
             return requestNum;
         }
