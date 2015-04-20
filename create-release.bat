@@ -36,10 +36,10 @@ REM -- Update DataCollectors if present
 if exist ..\datacollectors\lib (
 	echo.
 	lib\utils\echoc 2 Found data collectors project...
-	set update_data_collectors=y
-	set /p update_data_collectors="Update data collectors solum library? [y]/n "
+	set updatedclib=y
+	set /p updatedclib="Update data collectors solum library? [y]/n "
 
-	if "%update_data_collectors:~0,1%" equ "y" (
+	if "%updatedclib:~0,1%" equ "y" (
 		lib\utils\echoc 2 Removing existing solum library archive...
 		del ..\datacollectors\lib\*-solum*.zip
 		
@@ -47,11 +47,14 @@ if exist ..\datacollectors\lib (
 		copy /y /v release\%current_date%-solum-lib.zip ..\datacollectors\lib\
 		
 		lib\utils\echoc 2 Extracting library...
-		lib\utils\unzip -o ..\datacollectors\lib\*-solum*.zip -d ..\datacollectors\lib\solum
+		lib\utils\unzip -o ..\datacollectors\lib\*-solum-lib.zip -d ..\datacollectors\lib\solum
+	) else (
+		goto GIT
 	)
 )
 
 
+:GIT
 REM -- Display git status
 git status
 

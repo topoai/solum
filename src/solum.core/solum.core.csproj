@@ -111,6 +111,7 @@
     <Compile Include="Server.cs" />
     <Compile Include="Server_Current.cs" />
     <Compile Include="Service.cs" />
+    <Compile Include="smtp\EmailService.cs" />
     <Compile Include="storage\Database.cs" />
     <Compile Include="storage\Database_Locking.cs" />
     <Compile Include="storage\Database_OpenClose.cs" />
