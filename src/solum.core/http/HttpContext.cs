@@ -20,7 +20,7 @@ namespace solum.core.http
 
         Stopwatch m_timer;
 
-        bool IsCompleted { get; private set; }
+        public bool IsCompleted { get; private set; }
         public long RequestNum { get; private set; }        
         public HttpListenerContext Context { get; private set; }
         public TimeSpan Elapsed { get { return m_timer.Elapsed; } }
