@@ -165,10 +165,12 @@ namespace solum.core.http
             {
                 try
                 {
-                    var timeout = new CancellationTokenSource(RequestHandlerTimeout);
+                    var timeout = new CancellationTokenSource();
+                    timeout.CancelAfter(RequestHandlerTimeout);
+
                     await Task.Run(() => HandleRequestAsync(context), timeout.Token);
                 }
-                catch (TaskCanceledException)
+                catch (OperationCanceledException)
                 {
                     Log.Error("The request was canceled because it took longer than {0} to complete.".format(RequestHandlerTimeout));
                 }
