@@ -26,6 +26,7 @@ namespace solum.core.http
             this.MaxActiveRequests = DEFAULT_MAX_REQUESTS;
             this.NetshRegistrationEnabled = true;
             this.NetshRegistraionUser = "Everyone";
+            this.RequestHandlerTimeout = TimeSpan.FromSeconds(30);
             this.Addresses = new List<string>();
             this.Handlers = new List<IHttpRequestHandler>();
         }
@@ -63,6 +64,12 @@ namespace solum.core.http
         /// </summary>
         [JsonProperty("max-active-requests", DefaultValueHandling = DefaultValueHandling.Populate)]
         public int MaxActiveRequests { get; private set; }
+        /// <summary>
+        /// Maximum amount of time to process each Request.  
+        /// If requests take longer to compelete, they are canceled.
+        /// </summary>
+        [JsonProperty("request-handler-timeout")]
+        public TimeSpan RequestHandlerTimeout { get; private set; }
         #endregion
 
         /// <summary>
@@ -113,7 +120,22 @@ namespace solum.core.http
             options.MaxDegreeOfParallelism = MaxActiveRequests;
 
             m_receive_request_block = new BufferBlock<HttpContext>();
-            m_process_request_block = new ActionBlock<HttpContext>(context => HandleRequestAsync(context), options);
+            m_process_request_block = new ActionBlock<HttpContext>(async context =>
+            {
+                try
+                {
+                    var timeout = new CancellationTokenSource(RequestHandlerTimeout);
+                    await Task.Run(() => HandleRequestAsync(context), timeout.Token);
+                }
+                catch (TaskCanceledException)
+                {
+                    Log.Error("The request was canceled because it took longer than {0} to complete.".format(RequestHandlerTimeout));
+                }
+                catch (Exception ex)
+                {
+                    Log.FatalException("Critical Error Not Handled handling request #{0}: {1}".format(context.RequestNum, ex.Message), ex);
+                }
+            }, options);
 
             m_receive_request_block.LinkTo(m_process_request_block, new DataflowLinkOptions()
             {
@@ -222,9 +244,6 @@ namespace solum.core.http
             // ** Check stop signal
             while (m_stopReceived == false)
             {
-                // ** Receive the next request
-                // HttpListenerContext context;
-
                 if (m_receive_request_block.Count > 0 || m_process_request_block.InputCount > 0)
                     Log.Debug("{0}->{1} pending requests...", m_receive_request_block.Count, m_process_request_block.InputCount);
 
