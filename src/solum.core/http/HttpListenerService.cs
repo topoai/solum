@@ -13,6 +13,7 @@ using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Threading.Tasks.Dataflow;
+using solum.core.smtp;
 
 namespace solum.core.http
 {
@@ -70,6 +71,30 @@ namespace solum.core.http
         /// </summary>
         [JsonProperty("request-handler-timeout")]
         public TimeSpan RequestHandlerTimeout { get; private set; }
+        /// <summary>
+        /// Specifies that a notification email should be generated 
+        /// if the pending queue size exceeds the specfied threshold
+        /// </summary>
+        [JsonProperty("notify-pending-request-threshold")]
+        public int? NotifyPendingRequestThreshold { get; private set; }
+        /// <summary>
+        /// Specifies the delay between notification emails if queue
+        /// size is above the configured threshold
+        /// </summary>
+        [JsonProperty("notify-pending-request-delay")]
+        public TimeSpan NotifyPendingRequestDelay { get; private set; }
+        /// <summary>
+        /// The from address for notification emails.  
+        /// - If null or empty then the default from the email service is used
+        /// </summary>
+        [JsonProperty("notify-pending-request-from")]
+        public string NotifyPendingRequestFrom { get; private set; }
+        /// <summary>
+        /// The to address to use for notification emails
+        /// </summary>
+        [JsonProperty("notify-pending-request-to")]
+        public string NotifyPendingRequestTo { get; private set; }
+
         #endregion
 
         /// <summary>
@@ -101,7 +126,14 @@ namespace solum.core.http
         /// Can be parallized by setting MaxActiveRequests > 1
         /// </summary>
         ActionBlock<HttpContext> m_process_request_block;
-        // ActionBlock<HttpContext> m_complete_context;
+        /// <summary>
+        /// Service to deliever notification emails for warnings and failures.
+        /// </summary>
+        EmailService m_email_service;
+        /// <summary>
+        /// The timer that will reset between notification emails
+        /// </summary>
+        Stopwatch m_email_delay_timer;
 
         protected override void OnLoad()
         {
@@ -115,9 +147,18 @@ namespace solum.core.http
 
             // *** Set number of parallel workers to the size of the processor
             // TODO: Make configurable
-            Log.Debug("Max active requests: {0}", MaxActiveRequests);
+            Log.Info("Max active requests: {0}", MaxActiveRequests);
             options.BoundedCapacity = MaxActiveRequests;
             options.MaxDegreeOfParallelism = MaxActiveRequests;
+
+            // ** Check notification settings
+            if (NotifyPendingRequestThreshold.HasValue)
+            {
+                Log.Info("Notification email will be send if pending queue size exceeds {0:N0} messages.".format(NotifyPendingRequestThreshold.Value));
+                m_email_delay_timer = new Stopwatch();
+            }
+            else
+                Log.Warn("Notifications for pending queue size are DISABLED!  If the server hangs no one will know.  Please ensure this is the desired configuration...");
 
             m_receive_request_block = new BufferBlock<HttpContext>();
             m_process_request_block = new ActionBlock<HttpContext>(async context =>
@@ -147,7 +188,18 @@ namespace solum.core.http
         }
         protected override void OnStart()
         {
-            // Create a listener.
+            // ** Ensure that an email service is configured
+            if (NotifyPendingRequestThreshold.HasValue)
+            {
+                m_email_service = Server.Current.Service<EmailService>();
+                if (m_email_service == null)
+                    throw new ArgumentException("An email service is not loaded and is required to send notification emails.");
+
+                if (string.IsNullOrEmpty(NotifyPendingRequestTo))
+                    throw new ArgumentException(@"A ""to"" address must be configured for the notification service to send emails.");
+            }
+
+            // Start HTTP listener.
             try
             {
                 StartHttpListener();
@@ -236,7 +288,6 @@ namespace solum.core.http
 
             Addresses.ForEach(address => Log.Info("Listening on address: {0}", address));
         }
-
         async Task HandleRequestsAsync()
         {
             m_requests_received = 0;
@@ -244,8 +295,7 @@ namespace solum.core.http
             // ** Check stop signal
             while (m_stopReceived == false)
             {
-                if (m_receive_request_block.Count > 0 || m_process_request_block.InputCount > 0)
-                    Log.Debug("{0}->{1} pending requests...", m_receive_request_block.Count, m_process_request_block.InputCount);
+                checkPendingQueueSize();
 
                 Log.Trace("Waiting for request...");
                 var context = await m_listener.GetContextAsync();
@@ -257,12 +307,9 @@ namespace solum.core.http
                 // Handle the request in the background and move ont o rec
                 var httpContext = new HttpContext(requestNum, context);
 
-                // ** Post the current context to the queue and move onto accept the next request.
-                //if (!m_process_request_block.Post(httpContext))
+                // ** Post the current context to the queue and move onto accept the next request.                
                 if (!m_receive_request_block.Post(httpContext))
-                {
                     throw new Exception("ERROR: Request BUFFER Full!!!");
-                }
             }
         }
         async Task<long> HandleRequestAsync(HttpContext httpContext)
@@ -333,7 +380,7 @@ namespace solum.core.http
             processTimer.Stop();
             httpContext.Complete();
             Log.Debug("------------------------------------------");
-            Log.Debug("- Request..................... #{0}", requestNum);
+            Log.Debug("- Request..................... #{0:N0}", requestNum);
 
             var elapsedTimeMilliseconds = httpContext.Elapsed.TotalMilliseconds;
             if (elapsedTimeMilliseconds > 1000)
@@ -347,10 +394,57 @@ namespace solum.core.http
             Log.Debug("- Response:Content-Length..... {0}", context.Response.ContentLength64);
             Log.Debug("------------------------------------------");
 
-            Log.Debug("{0}->{1} pending requests...", m_receive_request_block.Count, m_process_request_block.InputCount);
+            checkPendingQueueSize();
 
             return requestNum;
         }
+
+        void checkPendingQueueSize()
+        {
+            var threshold = NotifyPendingRequestThreshold;
+
+            if (m_receive_request_block.Count > threshold ||
+                m_process_request_block.InputCount > threshold)
+            {
+                // Issue warning and generate email notification
+                Log.Warn("{0}->{1} pending requests...", m_receive_request_block.Count, m_process_request_block.InputCount);
+
+                if (NotifyPendingRequestThreshold.HasValue &&
+                    (m_email_delay_timer.Elapsed >= NotifyPendingRequestDelay ||
+                    m_email_delay_timer.IsRunning == false // This will happen on the first error occurrance
+                    ))
+                {
+                    var queueSize = m_receive_request_block.Count > m_process_request_block.InputCount
+                                  ? m_receive_request_block.Count
+                                  : m_process_request_block.InputCount;
+
+                    var subject = "Pending Queue Size Threshold Exceeded.  queuesize={0} threshold={1}".format(queueSize, NotifyPendingRequestThreshold);
+                    var body = @"
+There are currently {0} pending requests in the queue which exceeds the configured threshold of {1}.
+
+Waiting {2} until next notification...".format(queueSize, NotifyPendingRequestThreshold, NotifyPendingRequestDelay);
+
+                    // Generate an email notification
+                    if (string.IsNullOrEmpty(NotifyPendingRequestFrom))
+                    {
+                        Log.Trace("Generating notification with default from, to={0}, subject={1}".format(NotifyPendingRequestTo, subject));
+                        m_email_service.Email(NotifyPendingRequestTo, subject, body);
+                    }
+                    else
+                    {
+                        Log.Trace("Generating notification email from={0}, to={1}, subject={2}".format(NotifyPendingRequestFrom, NotifyPendingRequestTo, subject));
+                        m_email_service.Email(NotifyPendingRequestFrom, NotifyPendingRequestTo, subject, body);
+                    }
+
+                    // Reset the notification timer
+                    m_email_delay_timer.Restart();
+                }
+            }
+            else
+                Log.Debug("{0}->{1} pending requests...", m_receive_request_block.Count, m_process_request_block.InputCount);
+        }
+
+
         static string SanitizeUrl(string address)
         {
             // ** Sanitize the address
