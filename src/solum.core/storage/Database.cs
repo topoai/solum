@@ -64,7 +64,7 @@ namespace solum.core.storage
         int numRecords;
         /// <summary>
         /// The length of the stored data in the data file.
-        /// Note: This value is measured from the DATA_OFFSET, not the beginning of the file.
+        /// Note: This newValue is measured from the DATA_OFFSET, not the beginning of the file.
         /// </summary>
         long dataLength;
 
