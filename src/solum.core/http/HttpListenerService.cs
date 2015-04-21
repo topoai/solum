@@ -22,7 +22,7 @@ namespace solum.core.http
         const int ACCESS_DENIED_ERROR_CODE = 5;
         readonly static int DEFAULT_MAX_REQUESTS = Environment.ProcessorCount;
 
-        protected HttpListenerService()
+        protected HttpListenerService(string name) : base(name)
         {
             this.MaxActiveRequests = DEFAULT_MAX_REQUESTS;
             this.NetshRegistrationEnabled = true;

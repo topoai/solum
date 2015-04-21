@@ -29,7 +29,7 @@ namespace solum.core
                             if (File.Exists(DEFAULT_SERVER_CONFG))
                                 RunServer(DEFAULT_SERVER_CONFG);
                             else
-                                _instance = new Server();
+                                _instance = new Server("default-server");
                         }
                     }
                 }

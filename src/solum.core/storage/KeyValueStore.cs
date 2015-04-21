@@ -10,13 +10,21 @@ namespace solum.core.storage
 {
     public partial class KeyValueStore : Component, IDisposable
     {
-        public const byte DEFAULT_KEY_SIZE = 255;
-        public const ushort DEFAULT_PAGE_SIZE = 10000;
+        #region Converters to access underlying Database
+        public static implicit operator Database(KeyValueStore store)
+        {
+            store.ensureOpened();
+            return store.m_database;
+        }
+        #endregion
 
-        public KeyValueStore(DirectoryInfo dataDirectory, string name)
+        public const byte DEFAULT_KEY_SIZE = 255;
+        public const ushort DEFAULT_PAGE_SIZE = 10000;        
+
+        public KeyValueStore(DirectoryInfo dataDirectory, string name, Encoding encoding)
         {
             // ** Undelying data store
-            this.m_database = new Database(dataDirectory, name);
+            this.m_database = new Database(dataDirectory, name, encoding);
 
             this.Name = name;
             this.IsOpened = false;
@@ -146,18 +154,6 @@ namespace solum.core.storage
 
             lock (m_index)
                 return m_index.Get(key, out id);
-        }
-
-        // TODO: Remove these methods and replace with a query
-        public IEnumerable<Record> Records(bool includeDeleted = false)
-        {
-            return m_database.Records(includeDeleted);
-        }
-
-        // TODO: Remove these methods and replace with a query
-        public IEnumerable<RecordHeader> Headers(bool includeDeleted = false)
-        {
-            return m_database.Headers(includeDeleted);
         }
 
         /// <summary>

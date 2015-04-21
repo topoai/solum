@@ -14,6 +14,11 @@ namespace solum.core.smtp
 {
     public class EmailService : Service
     {
+        public EmailService(string name) : base(name)
+        {
+
+        }
+
         #region Configuration Properties
         [JsonProperty("smtp-host", Required=Required.Always)]
         public string SmtpHost { get; private set; }
