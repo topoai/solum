@@ -10,6 +10,11 @@ namespace solum.core
 {
     public class NamedComponent : Component
     {
+        /// <summary>
+        /// Name of service will come from a deserializer
+        /// </summary>
+        protected NamedComponent() { }
+
         protected NamedComponent(string name) : base(LogManager.GetLogger(name))
         {
             this.Name = name;

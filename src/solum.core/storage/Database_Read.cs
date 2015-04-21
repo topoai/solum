@@ -55,21 +55,18 @@ namespace solum.core.storage
             }
         }
         #endregion
-        
-        public RecordHeader ReadHeader(long id)
-        {
-            using (headerReadLock)
-            {
-                m_headerStream.Position = getHeaderPosition(id);
 
-                var header = RecordHeader.Read(m_headerStream);
-                return header;
-            }
+        RecordHeader ReadHeader(long id)
+        {
+            m_headerStream.Position = getHeaderPosition(id);
+
+            var header = RecordHeader.Read(m_headerStream);
+            return header;
         }
         public Record ReadRecord(long id)
         {
             //using (headerReadLock)
-            using (dataReadLock)
+            //using (dataReadLock)
             {
                 // ** Read the header
                 var header = ReadHeader(id);

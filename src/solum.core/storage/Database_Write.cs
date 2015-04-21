@@ -10,7 +10,7 @@ namespace solum.core.storage
     partial class Database
     {
         /// <summary>
-        /// Store a string value as a new record
+        /// Store a string currentValue as a new record
         /// </summary>
         /// <param name="data"></param>
         /// <returns></returns>
@@ -48,7 +48,7 @@ namespace solum.core.storage
                 // if all writes are successfull
                 var newDataLength = m_dataLength + record.SizeOf;
 
-                // Update the data file meta data
+                // Set the data file meta data
                 m_dataMetaData.Write(DataPositions.NUM_RECORDS_POS, newNumRecords);
                 m_dataMetaData.Write(DataPositions.DATA_LENGTH_POS, newDataLength);
 
@@ -57,7 +57,7 @@ namespace solum.core.storage
                 m_headerStream.Position = headerPosition;
                 header.Write(m_headerWriter);
 
-                // Update the header file meta data
+                // Set the header file meta data
                 m_headerMetaData.Write(HeaderPositions.NUM_RECORDS_POS, newNumRecords);
 
                 // ** Increment the values since we are successful
@@ -94,7 +94,7 @@ namespace solum.core.storage
             }
         }
         /// <summary>
-        /// Update the underlying data for the record.
+        /// Set the underlying data for the record.
         /// 
         /// NOTE:
         /// Writing more data than was previously allocated is not allow.
@@ -104,8 +104,8 @@ namespace solum.core.storage
         /// <param name="data"></param>
         public void Update(long id, byte[] data)
         {
-            lock (headerWriteLock)
-            lock (dataWriteLock)                
+            using (headerWriteLock)
+            using (dataWriteLock)                
             {
                 // ** Get the header which describes the posistion and length
                 //    of the data block for specified the record id
