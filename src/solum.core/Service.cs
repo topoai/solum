@@ -1,5 +1,4 @@
-﻿using solum.core.stats;
-using solum.core.storage;
+﻿using solum.core.storage;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -18,6 +17,11 @@ namespace solum.core
             Stopped,
             Unloaded
         }
+
+        /// <summary>
+        /// Name of service will be deserialized
+        /// </summary>
+        protected Service() { }
 
         protected Service(string name)
             : base(name)

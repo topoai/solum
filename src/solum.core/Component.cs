@@ -1,5 +1,4 @@
 ﻿using NLog;
-using solum.core.stats;
 using System;
 using System.Collections.Generic;
 using System.Linq;

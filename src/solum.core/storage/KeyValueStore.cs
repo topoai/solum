@@ -77,54 +77,8 @@ namespace solum.core.storage
             Log.Debug("Shutting down the index...");
             m_index.Shutdown();
         }
-        public long Set(string key, byte[] value)
-        {
-            ensureOpened();
+        
 
-            lock (m_index)
-            {
-                // ** Check if the key already exits
-                int existingId = -1;
-                if (m_index.Get(key, out existingId))
-                {
-                    // Delete the existing record before adding
-                    m_database.Delete(existingId);
-                }
-
-                // ** Store the new newValue as a record            
-                var record = m_database.Store(value);
-
-                // ** Index the record id with the key
-                var id = record.Id;
-
-                if (id > int.MaxValue)
-                    throw new NotSupportedException("Id's larger than {0} are not supported.".format(id));
-
-                m_index.Set(key, (int)id);
-
-                return id;
-            }
-        }
-        public bool Get(string key, out byte[] value)
-        {
-            ensureOpened();
-
-            lock (m_index)
-            {
-                value = null;
-
-                // ** Search the index for the key
-                int id;
-                if (!m_index.Get(key, out id))
-                    return false;
-
-                // ** Read the record from the database
-                var record = m_database.ReadRecord(id);
-                value = record.Data;
-
-                return true;
-            }
-        }        
         public bool Remove(string key)
         {
             ensureOpened();
@@ -151,7 +105,6 @@ namespace solum.core.storage
             ensureOpened();
 
             int id;
-
             lock (m_index)
                 return m_index.Get(key, out id);
         }
