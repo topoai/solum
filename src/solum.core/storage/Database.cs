@@ -32,7 +32,7 @@ namespace solum.core.storage
         }
         #endregion
 
-        public Database(DirectoryInfo dataDirectory, string databaseName)
+        public Database(DirectoryInfo dataDirectory, string databaseName, Encoding encoding)
         {
             // ** Debug/Testing only - REMOVE!
             //if (File.Exists(dataFilePath))
@@ -44,45 +44,51 @@ namespace solum.core.storage
             this.DataDirectory = dataDirectory;
             this.Name = databaseName;
             this.IsOpened = false;
+            
+            this.m_encoding = encoding;
 
             var dataFilePath = Path.Combine(DataDirectory.FullName, "{0}.dat".format(databaseName));
             var headerFilePath = Path.Combine(DataDirectory.FullName, "{0}.hdr".format(databaseName));
-            this.dataFileInfo = new FileInfo(dataFilePath);
-            this.headerFileInfo = new FileInfo(headerFilePath);
+            this.m_dataFileInfo = new FileInfo(dataFilePath);
+            this.m_headerFileInfo = new FileInfo(headerFilePath);
         }
 
         #region Public Properties
         public string Name { get; private set; }
-        public long NumRecords { get { return numRecords; } }
+        public long NumRecords { get { return m_numRecords; } }
         public bool IsOpened { get; private set; }
         public DirectoryInfo DataDirectory { get; private set; }
         #endregion        
         
         /// <summary>
+        /// The encoding to use when writing data to the underlying storage
+        /// </summary>
+        Encoding m_encoding;
+        /// <summary>
         /// The total number of records stored in the database
         /// </summary>
-        int numRecords;
+        int m_numRecords;
         /// <summary>
         /// The length of the stored data in the data file.
         /// Note: This newValue is measured from the DATA_OFFSET, not the beginning of the file.
         /// </summary>
-        long dataLength;
+        long m_dataLength;
 
         #region File system resources
-        FileInfo dataFileInfo;
-        FileInfo headerFileInfo;
+        FileInfo m_dataFileInfo;
+        FileInfo m_headerFileInfo;
 
-        MemoryMappedFile dataFile;
-        MemoryMappedFile headerFile;
+        MemoryMappedFile m_dataFile;
+        MemoryMappedFile m_headerFile;
 
-        MemoryMappedViewAccessor dataMetaData;
-        MemoryMappedViewAccessor headerMetaData;
+        MemoryMappedViewAccessor m_dataMetaData;
+        MemoryMappedViewAccessor m_headerMetaData;
 
-        MemoryMappedViewStream dataStream;
-        MemoryMappedViewStream headerStream;
+        MemoryMappedViewStream m_dataStream;
+        MemoryMappedViewStream m_headerStream;
 
-        BinaryWriter dataAppender;
-        BinaryWriter headerAppender;
+        BinaryWriter m_dataWriter;
+        BinaryWriter m_headerWriter;
         #endregion
 
         /// <summary>
