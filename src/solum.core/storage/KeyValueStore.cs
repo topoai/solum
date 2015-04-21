@@ -83,7 +83,7 @@ namespace solum.core.storage
                     m_database.Delete(existingId);
                 }
 
-                // ** Store the new value as a record            
+                // ** Store the new newValue as a record            
                 var record = m_database.Store(value);
 
                 // ** Index the record id with the key

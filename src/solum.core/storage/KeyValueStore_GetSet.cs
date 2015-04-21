@@ -20,7 +20,7 @@ namespace solum.core.storage
         /// using the SystemSettings.Encoding
         /// </summary>
         /// <param name="key"></param>
-        /// <param name="value"></param>
+        /// <param name="newValue"></param>
         public long Set(string key, string value)
         {
             // ** Convert
@@ -31,24 +31,24 @@ namespace solum.core.storage
             return Set(key, bytes);
         }
         /// <summary>
-        /// Retuns a string value encoded using the 
+        /// Retuns a string newValue encoded using the 
         /// SystemSettings.Encoding for the specified
         /// key
         /// </summary>
         /// <param name="key"></param>
-        /// <param name="value"></param>
+        /// <param name="newValue"></param>
         /// <returns></returns>
         public bool Get(string key, out string value)
         {
-            // ** Intialize value to null
+            // ** Intialize newValue to null
             value = null;
 
-            // ** Fetch binary value
+            // ** Fetch binary newValue
             byte[] bytes;
             if (!Get(key, out bytes))
                 return false;
 
-            // ** Decode the value
+            // ** Decode the newValue
             var encoding = SystemSettings.Encoding;
             value = encoding.GetString(bytes);
 
@@ -61,7 +61,7 @@ namespace solum.core.storage
         /// Stores date time as a long using the Ticks property.
         /// </summary>
         /// <param name="key"></param>
-        /// <param name="value"></param>
+        /// <param name="newValue"></param>
         public long Set(string key, DateTime value)
         {
             var ticks = value.Ticks;
@@ -75,7 +75,7 @@ namespace solum.core.storage
         /// to a DateTime object.
         /// </summary>
         /// <param name="key"></param>
-        /// <param name="value"></param>
+        /// <param name="newValue"></param>
         /// <returns></returns>
         public bool Get(string key, out DateTime value)
         {
@@ -93,17 +93,17 @@ namespace solum.core.storage
 
         #region Generic Objects
         /// <summary>
-        /// Sets a serialized value of an object
+        /// Sets a serialized newValue of an object
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="key"></param>
-        /// <param name="value"></param>
+        /// <param name="newValue"></param>
         public long Set<T>(string key, T value)
         {
-            // ** Serialize the value
+            // ** Serialize the newValue
             var json = value.ToJson(indent: false, includeTypes: true);
 
-            // ** Store the value as a JSON string
+            // ** Store the newValue as a JSON string
             return Set(key, json);
         }
 

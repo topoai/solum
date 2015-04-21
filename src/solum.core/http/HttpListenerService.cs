@@ -140,14 +140,9 @@ namespace solum.core.http
             if (!HttpListener.IsSupported)
                 throw new Exception("HttpListener class is not supported by this OS.");
 
-            // *** Initialize context request queue
-            var options = new ExecutionDataflowBlockOptions();
-            //if (MaxActiveRequests > 0)
-            //    options.BoundedCapacity = MaxActiveRequests;
-
-            // *** Set number of parallel workers to the size of the processor
-            // TODO: Make configurable
+            // *** Initialize context request queue            
             Log.Info("Max active requests: {0}", MaxActiveRequests);
+            var options = new ExecutionDataflowBlockOptions();
             options.BoundedCapacity = MaxActiveRequests;
             options.MaxDegreeOfParallelism = MaxActiveRequests;
 
@@ -165,18 +160,11 @@ namespace solum.core.http
             {
                 try
                 {
-                    var timeout = new CancellationTokenSource();
-                    timeout.CancelAfter(RequestHandlerTimeout);
-
-                    await Task.Run(() => HandleRequestAsync(context), timeout.Token);
-                }
-                catch (OperationCanceledException)
-                {
-                    Log.Error("The request was canceled because it took longer than {0} to complete.".format(RequestHandlerTimeout));
+                    await HandleRequestAsync(context);
                 }
                 catch (Exception ex)
                 {
-                    Log.FatalException("Critical Error Not Handled handling request #{0}: {1}".format(context.RequestNum, ex.Message), ex);
+                    Log.FatalException("[CRITICAL] An error was not handled during the processing of request #{0}: {1}".format(context.RequestNum, ex.Message), ex);
                 }
             }, options);
 
@@ -184,7 +172,6 @@ namespace solum.core.http
             {
                 PropagateCompletion = true
             });
-
 
             base.OnLoad();
         }
@@ -305,9 +292,9 @@ namespace solum.core.http
                 var requestNum = ++m_requests_received;
 
                 Log.Debug("Request #{0:N0} received...", requestNum);
-                // TODO: Use a dataprocess here to queue up requests and control the number of active tasks and their completion
-                // Handle the request in the background and move ont o rec
-                var httpContext = new HttpContext(requestNum, context);
+
+                // Handle the request in the background and move onto the next request
+                var httpContext = new HttpContext(requestNum, context, RequestHandlerTimeout);
 
                 // ** Post the current context to the queue and move onto accept the next request.                
                 if (!m_receive_request_block.Post(httpContext))
@@ -340,10 +327,6 @@ namespace solum.core.http
             var handler = Handlers.FirstOrDefault(h => h.AcceptRequest(request));
             if (handler == null)
             {
-                // ** Load the default handler since we have none
-                // TODO: Return 404
-
-                //response.Write("text/plain", responseString);
                 Log.Warn("No Handler found for request: {0}", request.RawUrl);
                 response.StatusCode = 404;
             }
@@ -355,17 +338,25 @@ namespace solum.core.http
                     if (handler.AsyncSupported)
                     {
                         Log.Trace("Handling request asyncronously...");
-                        await handler.HandleRequestAsync(request, response);
+                        await handler.HandleRequestAsync(request, response, httpContext.CancellationToken);
                     }
                     else
                     {
                         Log.Trace("Handling request syncronously...");
-                        handler.HandleRequest(request, response);
-                    }
+                        await Task.Run(() => handler.HandleRequest(request, response), httpContext.CancellationToken);
+                    }                    
                 }
-                catch (HttpListenerException ex)
+                catch (OperationCanceledException ex)
                 {
-                    Log.Error("Error Code: {0}", ex.ErrorCode);
+                    // Log.Error("Error Code: {0}", ex.ErrorCode);
+                    Log.ErrorException("The request timed out after {0} seconds before completing...".format(RequestHandlerTimeout.TotalSeconds), ex);
+
+                    response.StatusCode = 500;
+                    response.StatusDescription = "The request timed out after {0} seconds before completing...".format(RequestHandlerTimeout.TotalSeconds).RemoveControlCharacters();
+                }
+                catch (Exception ex)
+                {
+                    // Log.Error("Error Code: {0}", ex.ErrorCode);
                     Log.ErrorException("Error handling request: {0}".format(ex), ex);
 
                     response.StatusCode = 500;
@@ -374,9 +365,9 @@ namespace solum.core.http
             }
 
             // ** Flush and close the response
-            Log.Trace("Flushing response...");
+            Log.Trace("Flushing response stream...");
             response.OutputStream.Flush();
-            Log.Trace("Closing response...");
+            Log.Trace("Closing response stream...");
             response.OutputStream.Close();
 
             processTimer.Stop();
