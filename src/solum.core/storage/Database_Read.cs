@@ -16,9 +16,10 @@ namespace solum.core.storage
             {
                 dataStream.Position = DataPositions.DATA_OFFSET;
                 long recordCount = 0;
+                var numRecords = NumRecords;
                 using (var reader = new BinaryReader(dataStream, SystemSettings.Encoding, leaveOpen: true))
                 {
-                    while (recordCount < NumRecords)
+                    while (recordCount < numRecords)
                     {
                         // ** Read the next Record
                         var record = Record.Read(reader);
@@ -37,9 +38,10 @@ namespace solum.core.storage
             {
                 headerStream.Position = HeaderPositions.DATA_OFFSET;
                 long recordCount = 0;
+                var numRecords = NumRecords;
                 using (var reader = new BinaryReader(headerStream, SystemSettings.Encoding, leaveOpen: true))
                 {
-                    while (recordCount < NumRecords)
+                    while (recordCount < numRecords)
                     {
                         // ** Read the next Record
                         var header = RecordHeader.Read(reader);
