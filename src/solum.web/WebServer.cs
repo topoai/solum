@@ -19,10 +19,10 @@ namespace solum.web
         /// </summary>
         const string SESSION_LOGS = "session-logs";
 
-        WebServer()
+        WebServer() : base("web-server")
         {
             this.Modules = new List<WebModule>();
-            this.m_listener = new WebServerListener();
+            this.m_listener = new WebServerListener(this);
             this.ViewManager = new ViewManager();
         }
 

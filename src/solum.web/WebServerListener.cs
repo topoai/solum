@@ -9,6 +9,6 @@ namespace solum.web
 {
     public class WebServerListener : HttpListenerService
     {
-        
+        public WebServerListener(WebServer server) : base("{0}-listener".format(server.Name)) { }
     }
 }

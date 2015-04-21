@@ -17,7 +17,7 @@ namespace solum.core.storage
         /// <summary>
         /// Lock to use when reading/writing to the data file
         /// </summary>
-        ReaderWriterLockSlim dataReadWriteLock = new ReaderWriterLockSlim();        
+        ReaderWriterLockSlim m_dataReadWriteLock = new ReaderWriterLockSlim();        
 
         /// <summary>
         /// Return a WriteLocker class instance for this database
@@ -29,7 +29,7 @@ namespace solum.core.storage
             {
                 // ** Make sure the database is opened, or throw an exception
                 ensureOpened();
-                return new WriteLocker(dataReadWriteLock);
+                return new WriteLocker(m_dataReadWriteLock);
             }
         }
         /// <summary>
@@ -42,7 +42,7 @@ namespace solum.core.storage
             {
                 // ** Make sure the database is opened, or throw an exception
                 ensureOpened();
-                return new ReaderLocker(dataReadWriteLock);
+                return new ReaderLocker(m_dataReadWriteLock);
             }
         }
         #endregion
@@ -51,7 +51,7 @@ namespace solum.core.storage
         /// <summary>
         /// Lock to use when reading/writing to the header file
         /// </summary>
-        ReaderWriterLockSlim headerReadWriteLock = new ReaderWriterLockSlim();
+        ReaderWriterLockSlim m_headerReadWriteLock = new ReaderWriterLockSlim();
 
         /// <summary>
         /// Return a WriteLocker class instance for this database
@@ -63,7 +63,7 @@ namespace solum.core.storage
             {
                 // ** Make sure the database is opened, or throw an exception
                 ensureOpened();
-                return new WriteLocker(headerReadWriteLock);
+                return new WriteLocker(m_headerReadWriteLock);
             }
         }
         /// <summary>
@@ -76,7 +76,7 @@ namespace solum.core.storage
             {
                 // ** Make sure the database is opened, or throw an exception
                 ensureOpened();
-                return new ReaderLocker(headerReadWriteLock);
+                return new ReaderLocker(m_headerReadWriteLock);
             }
         }
         #endregion

@@ -14,10 +14,10 @@ namespace solum.core.storage
         {
             using (dataReadLock)
             {
-                dataStream.Position = DataPositions.DATA_OFFSET;
+                m_dataStream.Position = DataPositions.DATA_OFFSET;
                 long recordCount = 0;
                 var numRecords = NumRecords;
-                using (var reader = new BinaryReader(dataStream, SystemSettings.Encoding, leaveOpen: true))
+                using (var reader = new BinaryReader(m_dataStream, SystemSettings.Encoding, leaveOpen: true))
                 {
                     while (recordCount < numRecords)
                     {
@@ -36,10 +36,10 @@ namespace solum.core.storage
         {
             using (headerReadLock)
             {
-                headerStream.Position = HeaderPositions.DATA_OFFSET;
+                m_headerStream.Position = HeaderPositions.DATA_OFFSET;
                 long recordCount = 0;
                 var numRecords = NumRecords;
-                using (var reader = new BinaryReader(headerStream, SystemSettings.Encoding, leaveOpen: true))
+                using (var reader = new BinaryReader(m_headerStream, SystemSettings.Encoding, leaveOpen: true))
                 {
                     while (recordCount < numRecords)
                     {
@@ -60,9 +60,9 @@ namespace solum.core.storage
         {
             using (headerReadLock)
             {
-                headerStream.Position = getHeaderPosition(id);
+                m_headerStream.Position = getHeaderPosition(id);
 
-                var header = RecordHeader.Read(headerStream);
+                var header = RecordHeader.Read(m_headerStream);
                 return header;
             }
         }
@@ -75,10 +75,10 @@ namespace solum.core.storage
                 var header = ReadHeader(id);
 
                 // ** Reposition the data stream
-                dataStream.Position = DataPositions.DATA_OFFSET + header.Offset;
+                m_dataStream.Position = DataPositions.DATA_OFFSET + header.Offset;
                 Log.Trace("Reading record id={0} length={1}", id, header.Length);
 
-                var record = Record.Read(dataStream);
+                var record = Record.Read(m_dataStream);
                 return record;
             }
         }
