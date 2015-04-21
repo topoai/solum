@@ -27,7 +27,7 @@ namespace solum.core
                         if (_instance == null)
                         {
                             if (File.Exists(DEFAULT_SERVER_CONFG))
-                                RunServer(DEFAULT_SERVER_CONFG);
+                                _instance = Load(DEFAULT_SERVER_CONFG);
                             else
                                 _instance = new Server("default-server");
                         }
@@ -43,7 +43,7 @@ namespace solum.core
         /// </summary>
         /// <param name="configPath"></param>
         /// <returns></returns>
-        public static void RunServer(string configPath)
+        public static Server Load(string configPath)
         {
             if (_instance != null)
                 throw new Exception("Server already initialized.");
@@ -51,7 +51,7 @@ namespace solum.core
             var json = File.ReadAllText(configPath);
             _instance = json.FromJson<Server>();
 
-            RunServer();
+            return _instance;
         }
         public static void RunServer(bool promptToStart = PROMPT_TO_START)
         {

@@ -9,12 +9,13 @@ using System.Threading.Tasks;
 using System.Threading.Tasks.Dataflow;
 using System.ComponentModel;
 using System.Net;
+using solum.core.statistics;
 
 namespace solum.core.smtp
 {
     public class EmailService : Service
     {
-        public EmailService(string name) : base(name)
+        EmailService()
         {
 
         }
@@ -37,6 +38,7 @@ namespace solum.core.smtp
 
         SmtpClient m_client;
         ActionBlock<MailMessage> m_message_queue;
+        StatisticsDatabase m_stats;
 
         protected override void OnLoad()
         {
@@ -65,6 +67,10 @@ namespace solum.core.smtp
                 Log.Warn("No default from address specified... All messages must specify a From address to send a message.");
             else
                 Log.Debug("Default From Address: {0}".format(DefaultFromAddress));
+
+            // ** Load the statistics database
+            var db = Server.Current.Storage.OpenKeyValueStore("{0}-stats".format(Name));
+            m_stats = new StatisticsDatabase(db);
 
             base.OnLoad();
         }
@@ -128,10 +134,12 @@ namespace solum.core.smtp
             try
             {
                 m_client.Send(message);
+                m_stats.IncrementL("emails-sent");
             }
             catch (Exception ex)
             {
                 Log.ErrorException("Error sending email message: {0}".format(message.ToJson(indent: true)), ex);
+                m_stats.Increment("emails-failed");
 
                 // ** TODO: Save to failure queue or try message again...
                 //    TODO: Add failure retry limit...

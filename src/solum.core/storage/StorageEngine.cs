@@ -88,7 +88,7 @@ namespace solum.core.storage
             m_databases.ForEach(d => d.Close());
 
             Log.Info("Closing open key value stores...");
-            m_databases.ForEach(d => d.Close());
+            m_kv_stores.ForEach(d => d.Close());
         }
 
         void IDisposable.Dispose()

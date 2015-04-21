@@ -1698,6 +1698,9 @@
     <None Include="assets\js\vertical-timeline\README.md" />
     <None Include="assets\js\zurb-responsive-tables\.gitignore" />
     <None Include="assets\js\zurb-responsive-tables\javascripts\app.js.orig" />
+    <None Include="config\email-test.config.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="NLog.xsd">
       <SubType>Designer</SubType>
     </None>
