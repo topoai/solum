@@ -343,7 +343,8 @@ namespace solum.core.http
                     else
                     {
                         Log.Trace("Handling request syncronously...");
-                        await Task.Run(() => handler.HandleRequest(request, response), httpContext.CancellationToken);
+                        //await Task.Run(() => handler.HandleRequest(request, response), httpContext.CancellationToken);
+                        handler.HandleRequest(request, response);
                     }                    
                 }
                 catch (OperationCanceledException ex)
