@@ -8,5 +8,6 @@ namespace solum.core.statistics
 {
     interface IStatistic
     {
+
     }
 }
