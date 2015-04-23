@@ -143,7 +143,7 @@ namespace solum.core.http
             // *** Initialize context request queue            
             Log.Info("Max active requests: {0}", MaxActiveRequests);
             var options = new ExecutionDataflowBlockOptions();
-            options.BoundedCapacity = MaxActiveRequests;
+            // options.BoundedCapacity = MaxActiveRequests;
             options.MaxDegreeOfParallelism = MaxActiveRequests;
 
             // ** Check notification settings
@@ -155,7 +155,7 @@ namespace solum.core.http
             else
                 Log.Warn("Notifications for pending queue size are DISABLED!  If the server hangs no one will know.  Please ensure this is the desired configuration...");
 
-            m_receive_request_block = new BufferBlock<HttpContext>();
+            // m_receive_request_block = new BufferBlock<HttpContext>();
             m_process_request_block = new ActionBlock<HttpContext>(async context =>
             {
                 try
@@ -168,10 +168,10 @@ namespace solum.core.http
                 }
             }, options);
 
-            m_receive_request_block.LinkTo(m_process_request_block, new DataflowLinkOptions()
-            {
-                PropagateCompletion = true
-            });
+            //m_receive_request_block.LinkTo(m_process_request_block, new DataflowLinkOptions()
+            //{
+            //    PropagateCompletion = true
+            //});
 
             base.OnLoad();
         }
@@ -245,8 +245,9 @@ namespace solum.core.http
             var numActiveRequests = m_process_request_block.InputCount;
             if (numActiveRequests > 0)
             {
-                Log.Warn("Waiting for {0} active requests to complete.", m_receive_request_block.Count);
-                m_receive_request_block.Complete();
+                // Log.Warn("Waiting for {0} active requests to complete.", m_receive_request_block.Count);
+                // m_receive_request_block.Complete();
+                m_process_request_block.Complete();
                 m_process_request_block.Completion.Wait();
             }
 
@@ -297,11 +298,14 @@ namespace solum.core.http
                 var httpContext = new HttpContext(requestNum, context, RequestHandlerTimeout);
 
                 // ** Post the current context to the queue and move onto accept the next request.                
-                if (!m_receive_request_block.Post(httpContext))
+                //if (!m_receive_request_block.Post(httpContext))
+                //    throw new Exception("ERROR: Request BUFFER Full!!!");
+
+                if (!m_process_request_block.Post(httpContext))
                     throw new Exception("ERROR: Request BUFFER Full!!!");
             }
         }
-        async Task<long> HandleRequestAsync(HttpContext httpContext)
+        async Task HandleRequestAsync(HttpContext httpContext)
         {
             var requestNum = httpContext.RequestNum;
             var context = httpContext.Context;
@@ -389,8 +393,6 @@ namespace solum.core.http
             Log.Debug("------------------------------------------");
 
             checkPendingQueueSize();
-
-            return requestNum;
         }
 
         void checkPendingQueueSize()
