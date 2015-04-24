@@ -134,7 +134,7 @@ namespace solum.core.smtp
             try
             {
                 m_client.Send(message);
-                m_stats.IncrementL("emails-sent");
+                m_stats.Increment("emails-sent");
             }
             catch (Exception ex)
             {
