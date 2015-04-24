@@ -22,7 +22,8 @@ namespace solum.core.http
         const int ACCESS_DENIED_ERROR_CODE = 5;
         readonly static int DEFAULT_MAX_REQUESTS = Environment.ProcessorCount;
 
-        protected HttpListenerService(string name) : base(name)
+        protected HttpListenerService(string name)
+            : base(name)
         {
             this.MaxActiveRequests = DEFAULT_MAX_REQUESTS;
             this.NetshRegistrationEnabled = true;
@@ -50,51 +51,18 @@ namespace solum.core.http
         /// </summary>
         [JsonProperty("netsh-registration-user", DefaultValueHandling = DefaultValueHandling.Populate)]
         [DefaultValue("Everyone")]
-        public string NetshRegistraionUser { get; private set; }
-        [JsonProperty("default-response")]
-        public string DefaultResponse { get; private set; }
+        public string NetshRegistraionUser { get; private set; }        
         /// <summary>
         /// Collection of handlers to respond to various requests
         /// </summary>
         [JsonProperty("handlers")]
-        public List<IHttpRequestHandler> Handlers { get; private set; }
-        /// <summary>
-        /// Sets the maximum number of active requests at any given time. 
-        /// New requests will block once this limit is received.
-        /// Setting to zero means unbounded.
-        /// </summary>
-        [JsonProperty("max-active-requests", DefaultValueHandling = DefaultValueHandling.Populate)]
-        public int MaxActiveRequests { get; private set; }
+        public List<IHttpRequestHandler> Handlers { get; private set; }        
         /// <summary>
         /// Maximum amount of time to process each Request.  
         /// If requests take longer to compelete, they are canceled.
         /// </summary>
         [JsonProperty("request-handler-timeout")]
         public TimeSpan RequestHandlerTimeout { get; private set; }
-        /// <summary>
-        /// Specifies that a notification email should be generated 
-        /// if the pending queue size exceeds the specfied threshold
-        /// </summary>
-        [JsonProperty("notify-pending-request-threshold")]
-        public int? NotifyPendingRequestThreshold { get; private set; }
-        /// <summary>
-        /// Specifies the delay between notification emails if queue
-        /// size is above the configured threshold
-        /// </summary>
-        [JsonProperty("notify-pending-request-delay")]
-        public TimeSpan NotifyPendingRequestDelay { get; private set; }
-        /// <summary>
-        /// The from address for notification emails.  
-        /// - If null or empty then the default from the email service is used
-        /// </summary>
-        [JsonProperty("notify-pending-request-from")]
-        public string NotifyPendingRequestFrom { get; private set; }
-        /// <summary>
-        /// The to address to use for notification emails
-        /// </summary>
-        [JsonProperty("notify-pending-request-to")]
-        public string NotifyPendingRequestTo { get; private set; }
-
         #endregion
 
         /// <summary>
@@ -116,24 +84,11 @@ namespace solum.core.http
         /// <summary>
         /// Counter of requests received during the lifetime of this service.
         /// </summary>
-        long m_requests_received;
+        long m_requests_received;        
         /// <summary>
-        /// Incomming queue for active connections
+        /// Concurrent
         /// </summary>
-        BufferBlock<HttpContext> m_receive_request_block;
-        /// <summary>
-        /// Provides in order handling of http requests.
-        /// Can be parallized by setting MaxActiveRequests > 1
-        /// </summary>
-        ActionBlock<HttpContext> m_process_request_block;
-        /// <summary>
-        /// Service to deliever notification emails for warnings and failures.
-        /// </summary>
-        EmailService m_email_service;
-        /// <summary>
-        /// The timer that will reset between notification emails
-        /// </summary>
-        Stopwatch m_email_delay_timer;
+        ConcurrentDictionary<long, Task> m_active_requests;
 
         protected override void OnLoad()
         {
@@ -143,36 +98,9 @@ namespace solum.core.http
             // *** Initialize context request queue            
             Log.Info("Max active requests: {0}", MaxActiveRequests);
             var options = new ExecutionDataflowBlockOptions();
-            options.BoundedCapacity = MaxActiveRequests;
+            // options.BoundedCapacity = MaxActiveRequests;
             options.MaxDegreeOfParallelism = MaxActiveRequests;
-
-            // ** Check notification settings
-            if (NotifyPendingRequestThreshold.HasValue)
-            {
-                Log.Info("Notification email will be send if pending queue size exceeds {0:N0} messages.".format(NotifyPendingRequestThreshold.Value));
-                m_email_delay_timer = new Stopwatch();
-            }
-            else
-                Log.Warn("Notifications for pending queue size are DISABLED!  If the server hangs no one will know.  Please ensure this is the desired configuration...");
-
-            m_receive_request_block = new BufferBlock<HttpContext>();
-            m_process_request_block = new ActionBlock<HttpContext>(async context =>
-            {
-                try
-                {
-                    await HandleRequestAsync(context);
-                }
-                catch (Exception ex)
-                {
-                    Log.FatalException("[CRITICAL] An error was not handled during the processing of request #{0}: {1}".format(context.RequestNum, ex.Message), ex);
-                }
-            }, options);
-
-            m_receive_request_block.LinkTo(m_process_request_block, new DataflowLinkOptions()
-            {
-                PropagateCompletion = true
-            });
-
+            
             base.OnLoad();
         }
         protected override void OnStart()
@@ -230,6 +158,9 @@ namespace solum.core.http
             // ** Reset signal and create cancelation token
             m_stopReceived = false;
 
+            // ** Keep a list of active requests
+            m_active_requests = new ConcurrentDictionary<long, Task>();
+
             // ** Start the request handler
             Log.Debug("Starting the request handler...");
             m_receiveRequestTask = HandleRequestsAsync();
@@ -242,13 +173,21 @@ namespace solum.core.http
             m_stopReceived = true;
 
             // ** Complete Active Requests
-            var numActiveRequests = m_process_request_block.InputCount;
+            var numActiveRequests = m_active_requests.Count;
+            if (numActiveRequests > 0)
+            {
+                Log.Warn("Waiting for {0} active requests to complete.", m_active_requests.Count);
+                Task.WaitAll(m_active_requests.Values.ToArray());
+            }
+
+            // ** Complete Active Requests
+            /*var numActiveRequests = m_process_request_block.InputCount;
             if (numActiveRequests > 0)
             {
                 Log.Warn("Waiting for {0} active requests to complete.", m_receive_request_block.Count);
                 m_receive_request_block.Complete();
                 m_process_request_block.Completion.Wait();
-            }
+            }*/
 
             // ** Stop the http listener
             Log.Debug("Stopping the http listener...");
@@ -284,7 +223,7 @@ namespace solum.core.http
             // ** Check stop signal
             while (m_stopReceived == false)
             {
-                checkPendingQueueSize();
+                //checkPendingQueueSize();
 
                 Log.Trace("Waiting for request...");
                 var context = await m_listener.GetContextAsync();
@@ -296,12 +235,25 @@ namespace solum.core.http
                 // Handle the request in the background and move onto the next request
                 var httpContext = new HttpContext(requestNum, context, RequestHandlerTimeout);
 
+                // ** Add this to the list of active tasks
+                var activeReqeuestTask = HandleRequestAsync(httpContext).ContinueWith(task =>
+                {
+                    var taskResquestNum = task.Result.RequestNum;
+
+                    Task _;
+                    if (!m_active_requests.TryRemove(taskResquestNum, out _))
+                        Log.Error("Error removing request #{0:N0} from active requests.", taskResquestNum);
+                });
+
+                if (!m_active_requests.TryAdd(requestNum, activeReqeuestTask))
+                    Log.Error("Error adding request #{0:N0} to active requests.", requestNum);
+
                 // ** Post the current context to the queue and move onto accept the next request.                
-                if (!m_receive_request_block.Post(httpContext))
-                    throw new Exception("ERROR: Request BUFFER Full!!!");
+                //if (!m_receive_request_block.Post(httpContext))
+                //    throw new Exception("ERROR: Request BUFFER Full!!!");
             }
         }
-        async Task HandleRequestAsync(HttpContext httpContext)
+        async Task<HttpContext> HandleRequestAsync(HttpContext httpContext)
         {
             var requestNum = httpContext.RequestNum;
             var context = httpContext.Context;
@@ -343,9 +295,9 @@ namespace solum.core.http
                     else
                     {
                         Log.Trace("Handling request syncronously...");
-                        //await Task.Run(() => handler.HandleRequest(request, response), httpContext.CancellationToken);
-                        handler.HandleRequest(request, response);
-                    }                    
+                        await Task.Run(() => handler.HandleRequest(request, response), httpContext.CancellationToken);
+                        //handler.HandleRequest(request, response);
+                    }
                 }
                 catch (OperationCanceledException ex)
                 {
@@ -388,7 +340,9 @@ namespace solum.core.http
             Log.Debug("- Response:Content-Length..... {0}", context.Response.ContentLength64);
             Log.Debug("------------------------------------------");
 
-            checkPendingQueueSize();
+            //checkPendingQueueSize();
+
+            return httpContext;
         }
 
         void checkPendingQueueSize()
