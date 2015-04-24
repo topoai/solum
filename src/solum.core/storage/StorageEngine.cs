@@ -45,7 +45,7 @@ namespace solum.core.storage
                 return openedDatabase;            
 
             // ** The requested database has not been previously opened            
-            var database = new Database(DataDirectory, name);
+            var database = new Database(DataDirectory, name, SystemSettings.Encoding);
 
             Log.Info("Opening database... {0}", name);            
             database.Open();
@@ -62,7 +62,7 @@ namespace solum.core.storage
                 return openedKeyValueStore;
 
             // ** The requested database has not been previously opened            
-            var keyValueStore = new KeyValueStore(DataDirectory, name);
+            var keyValueStore = new KeyValueStore(DataDirectory, name, SystemSettings.Encoding);
 
             Log.Info("Opening key value store... {0}", name);
             keyValueStore.Open();
@@ -88,7 +88,7 @@ namespace solum.core.storage
             m_databases.ForEach(d => d.Close());
 
             Log.Info("Closing open key value stores...");
-            m_databases.ForEach(d => d.Close());
+            m_kv_stores.ForEach(d => d.Close());
         }
 
         void IDisposable.Dispose()

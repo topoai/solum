@@ -12,10 +12,13 @@ namespace solum.core
 {
     public partial class Server : Service, IDisposable
     {
+        const string DEFAULT_SERVER_NAME = "default-server";
         const string DEFAULT_SERVER_CONFG = "./server.config.json";
         const bool PROMPT_TO_START = false;
 
-        protected Server()
+        protected Server() : this(DEFAULT_SERVER_NAME) { }
+
+        protected Server(string name): base(name)
         {
             this.Storage = new StorageEngine();
             this.Services = new List<Service>();
@@ -65,8 +68,7 @@ namespace solum.core
             Storage.Close();
 
             base.OnUnload();
-        }
-
+        }        
 
         /// <summary>
         /// Get a loaded Service by Type.

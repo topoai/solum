@@ -9,7 +9,7 @@ namespace solum.extensions
 {
     public static class GuidExtensions
     {
-        const int GUID_SIZE_OF = 16; // 16 byte array
+        public const int GUID_SIZE_OF = 16; // 16 byte array
 
         public static Guid ReadGuid(Stream stream)
         {

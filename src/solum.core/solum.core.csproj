@@ -43,7 +43,7 @@
     <RootNamespace>solum.core</RootNamespace>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release - Linux|x64'">
-    <OutputPath>bin\x64\Release - Linux\</OutputPath>
+    <OutputPath>..\..\bin\</OutputPath>
     <DefineConstants>TRACE;LINUX</DefineConstants>
     <Optimize>true</Optimize>
     <DebugType>pdbonly</DebugType>
@@ -54,7 +54,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug - Linux|x64'">
     <DebugSymbols>true</DebugSymbols>
-    <OutputPath>bin\x64\Debug - Linux\</OutputPath>
+    <OutputPath>..\..\bin\</OutputPath>
     <DefineConstants>TRACE;DEBUG;LINUX</DefineConstants>
     <DebugType>full</DebugType>
     <PlatformTarget>x64</PlatformTarget>
@@ -68,8 +68,8 @@
       <HintPath>..\packages\Newtonsoft.Json.6.0.8\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="NLog, Version=3.2.0.0, Culture=neutral, PublicKeyToken=5120e14c03d0593c, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\NLog.3.2.0.0\lib\net45\NLog.dll</HintPath>
+      <HintPath>..\..\..\..\src\packages\NLog.3.2.0.0\lib\net45\NLog.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -105,12 +105,17 @@
     <Compile Include="dataprocess\interfaces\IDataSource.cs" />
     <Compile Include="http\ContentTypes.cs" />
     <Compile Include="http\handlers\StaticDirectoryHandler.cs" />
-    <Compile Include="http\HttpResponse.cs" />
+    <Compile Include="http\HttpContext.cs" />
+    <Compile Include="NamedComponent.cs" />
     <Compile Include="Process.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Server.cs" />
     <Compile Include="Server_Current.cs" />
     <Compile Include="Service.cs" />
+    <Compile Include="smtp\EmailService.cs" />
+    <Compile Include="statistics\IStatistic.cs" />
+    <Compile Include="statistics\Statistic.cs" />
+    <Compile Include="statistics\StatisticsDatabase.cs" />
     <Compile Include="storage\Database.cs" />
     <Compile Include="storage\Database_Locking.cs" />
     <Compile Include="storage\Database_OpenClose.cs" />

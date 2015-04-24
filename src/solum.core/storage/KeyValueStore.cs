@@ -10,13 +10,21 @@ namespace solum.core.storage
 {
     public partial class KeyValueStore : Component, IDisposable
     {
-        public const byte DEFAULT_KEY_SIZE = 255;
-        public const ushort DEFAULT_PAGE_SIZE = 10000;
+        #region Converters to access underlying Database
+        public static implicit operator Database(KeyValueStore store)
+        {
+            store.ensureOpened();
+            return store.m_database;
+        }
+        #endregion
 
-        public KeyValueStore(DirectoryInfo dataDirectory, string name)
+        public const byte DEFAULT_KEY_SIZE = 255;
+        public const ushort DEFAULT_PAGE_SIZE = 10000;        
+
+        public KeyValueStore(DirectoryInfo dataDirectory, string name, Encoding encoding)
         {
             // ** Undelying data store
-            this.m_database = new Database(dataDirectory, name);
+            this.m_database = new Database(dataDirectory, name, encoding);
 
             this.Name = name;
             this.IsOpened = false;
@@ -69,62 +77,36 @@ namespace solum.core.storage
             Log.Debug("Shutting down the index...");
             m_index.Shutdown();
         }
-        public void Set(string key, byte[] value)
+        
+
+        public bool Remove(string key)
         {
             ensureOpened();
 
-            // ** Check if the key already exits
-            int existingId = -1;
-            if (m_index.Get(key, out existingId))
+            lock (m_index)
             {
-                // Delete the existing record before adding
-                m_database.Delete(existingId);
+                // ** Search for the key in the index
+                int id;
+                if (m_index.Get(key, out id) == false)
+                    return false;
+
+                // ** Remove the key from the database
+                m_database.Delete(id);
+
+                // ** Remove the key from the index
+                m_index.RemoveKey(key);
+
+                return true;
             }
-
-            // ** Store the new value as a record            
-            var record = m_database.Store(value);
-
-            // ** Index the record id with the key
-            var id = record.Id;
-
-            if (id > int.MaxValue)
-                throw new NotSupportedException("Id's larger than {0} are not supported.".format(id));
-
-            m_index.Set(key, (int)id);
         }
-        public bool Get(string key, out byte[] value)
+
+        public bool ContainsKey(string key)
         {
             ensureOpened();
 
-            value = null;
-
-            // ** Search the index for the key
             int id;
-            if (!m_index.Get(key, out id))
-                return false;
-
-            // ** Read the record from the database
-            var record = m_database.ReadRecord(id);
-            value = record.Data;
-
-            return true;
-        }        
-        public bool Delete(string key)
-        {
-            ensureOpened();
-
-            // ** Search for the key in the index
-            int id;
-            if (m_index.Get(key, out id) == false)
-                return false;
-
-            // ** Remove the key from the database
-            m_database.Delete(id);
-            
-            // ** Remove the key from the index
-            m_index.RemoveKey(key);
-
-            return true;
+            lock (m_index)
+                return m_index.Get(key, out id);
         }
 
         /// <summary>

@@ -12,13 +12,14 @@ namespace solum.core.storage
         #region iterators
         public IEnumerable<Record> Records(bool includeDeleted = false)
         {
-            // using (readLock)
+            using (dataReadLock)
             {
-                dataStream.Position = DataPositions.DATA_OFFSET;
+                m_dataStream.Position = DataPositions.DATA_OFFSET;
                 long recordCount = 0;
-                using (var reader = new BinaryReader(dataStream, SystemSettings.Encoding, leaveOpen: true))
+                var numRecords = NumRecords;
+                using (var reader = new BinaryReader(m_dataStream, SystemSettings.Encoding, leaveOpen: true))
                 {
-                    while (recordCount < NumRecords)
+                    while (recordCount < numRecords)
                     {
                         // ** Read the next Record
                         var record = Record.Read(reader);
@@ -33,13 +34,14 @@ namespace solum.core.storage
         }
         public IEnumerable<RecordHeader> Headers(bool includeDeleted = false)
         {
-            // using (readLock)
+            using (headerReadLock)
             {
-                headerStream.Position = HeaderPositions.DATA_OFFSET;
+                m_headerStream.Position = HeaderPositions.DATA_OFFSET;
                 long recordCount = 0;
-                using (var reader = new BinaryReader(headerStream, SystemSettings.Encoding, leaveOpen: true))
+                var numRecords = NumRecords;
+                using (var reader = new BinaryReader(m_headerStream, SystemSettings.Encoding, leaveOpen: true))
                 {
-                    while (recordCount < NumRecords)
+                    while (recordCount < numRecords)
                     {
                         // ** Read the next Record
                         var header = RecordHeader.Read(reader);
@@ -53,29 +55,27 @@ namespace solum.core.storage
             }
         }
         #endregion
-        
-        public RecordHeader ReadHeader(long id)
-        {
-            using (headerReadLock)
-            {
-                headerStream.Position = getHeaderPosition(id);
 
-                var header = RecordHeader.Read(headerStream);
-                return header;
-            }
+        RecordHeader ReadHeader(long id)
+        {
+            m_headerStream.Position = getHeaderPosition(id);
+
+            var header = RecordHeader.Read(m_headerStream);
+            return header;
         }
         public Record ReadRecord(long id)
         {
-            using (dataReadLock)
+            //using (headerReadLock)
+            //using (dataReadLock)
             {
                 // ** Read the header
                 var header = ReadHeader(id);
 
                 // ** Reposition the data stream
-                dataStream.Position = DataPositions.DATA_OFFSET + header.Offset;
+                m_dataStream.Position = DataPositions.DATA_OFFSET + header.Offset;
                 Log.Trace("Reading record id={0} length={1}", id, header.Length);
 
-                var record = Record.Read(dataStream);
+                var record = Record.Read(m_dataStream);
                 return record;
             }
         }
