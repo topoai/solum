@@ -74,11 +74,11 @@ namespace solum.core.storage
                 exists = m_index.Get(key, out id);
 
                 if (!exists)
-                    // Set the stat for the first time
+                    // SetValue the stat for the first time
                     Set(key, value);
                 else
                 {
-                    // Set the existing currentValue (in-place)
+                    // SetValue the existing currentValue (in-place)
                     m_database.Update(id, value);
                 }
             }
