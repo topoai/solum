@@ -94,6 +94,7 @@ namespace solum.core.storage
         public long Set(string key, long value)
         {
             var bytes = BitConverter.GetBytes(value);
+
             return Set(key, bytes);
         }
         public bool Get(string key, out int value)
