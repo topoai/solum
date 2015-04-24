@@ -8,6 +8,6 @@ namespace solum.core.statistics
 {
     public interface IStatistic
     {
-        public string Name { get; }
+        string Name { get; }
     }
 }

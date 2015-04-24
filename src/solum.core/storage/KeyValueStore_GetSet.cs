@@ -74,11 +74,11 @@ namespace solum.core.storage
                 exists = m_index.Get(key, out id);
 
                 if (!exists)
-                    // SetValue the stat for the first time
+                    // Set the stat for the first time
                     Set(key, value);
                 else
                 {
-                    // SetValue the existing currentValue (in-place)
+                    // Set the existing currentValue (in-place)
                     m_database.Update(id, value);
                 }
             }
@@ -92,8 +92,8 @@ namespace solum.core.storage
             return Set(key, bytes);
         }
         public long Set(string key, long value)
-        {            
-            var bytes = BitConverter.GetBytes(value);            
+        {
+            var bytes = BitConverter.GetBytes(value);
             return Set(key, bytes);
         }
         public bool Get(string key, out int value)
@@ -117,7 +117,7 @@ namespace solum.core.storage
                 return false;
 
             value = BitConverter.ToInt64(bytes, 0);
-            
+
             return true;
         }
         public void Update(string key, long value)
