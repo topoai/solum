@@ -49,155 +49,155 @@ namespace solum.core.storage
 
         private void openDataResources()
         {
-            bool dataFileExits = dataFileInfo.Exists;
+            bool dataFileExits = m_dataFileInfo.Exists;
 
             if (dataFileExits == false)
             {
                 // Fix for MONO as CreateFromFile (OpenOrCreate) mode doesn't work.
-                FileStream fs = new FileStream(dataFileInfo.FullName, FileMode.CreateNew);
+                FileStream fs = new FileStream(m_dataFileInfo.FullName, FileMode.CreateNew);
                 fs.Seek(MAX_DATA_FILE_SIZE, SeekOrigin.Begin);
                 fs.WriteByte(0);
                 fs.Close();
                 fs.Dispose();
             }
 
-            Log.Debug("Opening data file...   {0}", dataFileInfo.FullName);
-            //dataFile = MemoryMappedFile.CreateFromFile(dataFileInfo.FullName, FileMode.Open, "{0}-data".format(Name));
-            dataFile = MemoryMappedFile.CreateFromFile(dataFileInfo.FullName, FileMode.Open, "{0}-data".format(Guid.NewGuid()));
+            Log.Debug("Opening data file...   {0}", m_dataFileInfo.FullName);
+            //m_dataFile = MemoryMappedFile.CreateFromFile(m_dataFileInfo.FullName, FileMode.Open, "{0}-data".format(Name));
+            m_dataFile = MemoryMappedFile.CreateFromFile(m_dataFileInfo.FullName, FileMode.Open, "{0}-data".format(Guid.NewGuid()));
 
-            dataMetaData = dataFile.CreateViewAccessor(0, DataPositions.DATA_OFFSET);
+            m_dataMetaData = m_dataFile.CreateViewAccessor(0, DataPositions.DATA_OFFSET);
 
             if (dataFileExits)
             {
                 // ** Read num records and data size
-                numRecords = dataMetaData.ReadInt32(DataPositions.NUM_RECORDS_POS);
-                dataLength = dataMetaData.ReadInt64(DataPositions.DATA_LENGTH_POS);
+                m_numRecords = m_dataMetaData.ReadInt32(DataPositions.NUM_RECORDS_POS);
+                m_dataLength = m_dataMetaData.ReadInt64(DataPositions.DATA_LENGTH_POS);
             }
             else
             {
-                dataMetaData.Write(DataPositions.NUM_RECORDS_POS, 0);
-                dataMetaData.Write(DataPositions.DATA_LENGTH_POS, 0L);
+                m_dataMetaData.Write(DataPositions.NUM_RECORDS_POS, 0);
+                m_dataMetaData.Write(DataPositions.DATA_LENGTH_POS, 0L);
             }
 
-            dataStream = dataFile.CreateViewStream();
+            m_dataStream = m_dataFile.CreateViewStream();
 
             // ** Open the stream that will store/append new writes
-            //dataWriteStream = dataFile.CreateViewStream();
-            //dataWriteStream.Seek(DataPositions.DATA_OFFSET + dataLength, SeekOrigin.Begin);
+            //dataWriteStream = m_dataFile.CreateViewStream();
+            //dataWriteStream.Seek(DataPositions.DATA_OFFSET + m_dataLength, SeekOrigin.Begin);
 
-            //dataAppender = new BinaryWriter(dataWriteStream, SystemSettings.Encoding, leaveOpen: true);
-            dataAppender = new BinaryWriter(dataStream, SystemSettings.Encoding, leaveOpen: true);
+            //m_dataWriter = new BinaryWriter(dataWriteStream, SystemSettings.Encoding, leaveOpen: true);
+            m_dataWriter = new BinaryWriter(m_dataStream, SystemSettings.Encoding, leaveOpen: true);
         }
         private void openHeaderResources()
         {
-            Log.Debug("Opening header file... {0}", headerFileInfo.FullName);
-            var headerFileExits = headerFileInfo.Exists;
+            Log.Debug("Opening header file... {0}", m_headerFileInfo.FullName);
+            var headerFileExits = m_headerFileInfo.Exists;
 
             if (headerFileExits == false)
             {
-                FileStream fs = new FileStream(headerFileInfo.FullName, FileMode.CreateNew);
+                FileStream fs = new FileStream(m_headerFileInfo.FullName, FileMode.CreateNew);
                 fs.Seek(MAX_HEADER_FILE_SIZE, SeekOrigin.Begin);
                 fs.WriteByte(0);
                 fs.Close();
                 fs.Dispose();
             }
 
-            //headerFile = MemoryMappedFile.CreateFromFile(headerFileInfo.FullName, FileMode.Open, "{0}-headers".format(Name));
-            headerFile = MemoryMappedFile.CreateFromFile(headerFileInfo.FullName, FileMode.Open, "{0}-headers".format(Guid.NewGuid()));
+            //m_headerFile = MemoryMappedFile.CreateFromFile(m_headerFileInfo.FullName, FileMode.Open, "{0}-headers".format(Name));
+            m_headerFile = MemoryMappedFile.CreateFromFile(m_headerFileInfo.FullName, FileMode.Open, "{0}-headers".format(Guid.NewGuid()));
 
-            headerMetaData = headerFile.CreateViewAccessor(0, HeaderPositions.DATA_OFFSET);
+            m_headerMetaData = m_headerFile.CreateViewAccessor(0, HeaderPositions.DATA_OFFSET);
             if (headerFileExits)
             {
                 // ** Double check the headerfile and datafile are in check
-                var headerNumRecords = headerMetaData.ReadInt64(HeaderPositions.NUM_RECORDS_POS);
-                if (headerNumRecords != numRecords)
+                var headerNumRecords = m_headerMetaData.ReadInt64(HeaderPositions.NUM_RECORDS_POS);
+                if (headerNumRecords != m_numRecords)
                     throw new Exception("Error: header file is out of sync with the data file.");
             }
             else
             {
                 // ** Initialize the header file metadata                    
-                headerMetaData.Write(HeaderPositions.NUM_RECORDS_POS, 0);
+                m_headerMetaData.Write(HeaderPositions.NUM_RECORDS_POS, 0);
             }
 
             // ** Position header stream to append
-            headerStream = headerFile.CreateViewStream();
-            headerStream.Seek(getHeaderPosition(numRecords), SeekOrigin.Begin);
+            m_headerStream = m_headerFile.CreateViewStream();
+            m_headerStream.Seek(getHeaderPosition(m_numRecords), SeekOrigin.Begin);
 
             // ** Open the stream that will store/append new writes
-            //headerWriteStream = headerFile.CreateViewStream();
-            //headerWriteStream.Seek(getHeaderPosition(numRecords), SeekOrigin.Begin);
+            //headerWriteStream = m_headerFile.CreateViewStream();
+            //headerWriteStream.Seek(getHeaderPosition(m_numRecords), SeekOrigin.Begin);
 
-            //headerAppender = new BinaryWriter(headerWriteStream, SystemSettings.Encoding, leaveOpen: true);
-            headerAppender = new BinaryWriter(headerStream, SystemSettings.Encoding, leaveOpen: true);
+            //m_headerWriter = new BinaryWriter(headerWriteStream, SystemSettings.Encoding, leaveOpen: true);
+            m_headerWriter = new BinaryWriter(m_headerStream, SystemSettings.Encoding, leaveOpen: true);
         }        
         private void closeDataResources()
         {
             Log.Trace("Flushing data resources...");            
-            dataAppender.Flush();
-            dataMetaData.Flush();
-            dataStream.Flush();
+            m_dataWriter.Flush();
+            m_dataMetaData.Flush();
+            m_dataStream.Flush();
             //dataWriteStream.Flush();            
 
             Log.Trace("Disposing data resources...");
-            if (dataAppender != null)
+            if (m_dataWriter != null)
             {
-                dataAppender.Dispose();
-                dataAppender = null;
+                m_dataWriter.Dispose();
+                m_dataWriter = null;
             }
-            if (dataStream != null)
+            if (m_dataStream != null)
             {
-                dataStream.Dispose();
-                dataStream = null;
+                m_dataStream.Dispose();
+                m_dataStream = null;
             }            
-            if (dataMetaData != null)
+            if (m_dataMetaData != null)
             {
-                dataMetaData.Dispose();
-                dataMetaData = null;
+                m_dataMetaData.Dispose();
+                m_dataMetaData = null;
             }
             //if (dataWriteStream != null)
             //{
             //    dataWriteStream.Dispose();
             //    dataWriteStream = null;
             //}            
-            if (dataFile != null)
+            if (m_dataFile != null)
             {
-                dataFile.Dispose();
-                dataFile = null;
+                m_dataFile.Dispose();
+                m_dataFile = null;
             }
         }
         private void closeHeaderResources()
         {
             Log.Trace("Flushing header resources...");            
-            headerAppender.Flush();
-            headerMetaData.Flush();
-            headerStream.Flush();
+            m_headerWriter.Flush();
+            m_headerMetaData.Flush();
+            m_headerStream.Flush();
             //headerWriteStream.Flush();
 
             Log.Trace("Closing header resources...");
-            if (headerAppender != null)
+            if (m_headerWriter != null)
             {
-                headerAppender.Dispose();
-                headerAppender = null;
+                m_headerWriter.Dispose();
+                m_headerWriter = null;
             }
-            if (headerStream != null)
+            if (m_headerStream != null)
             {
-                headerStream.Dispose();
-                headerStream = null;
+                m_headerStream.Dispose();
+                m_headerStream = null;
             }            
-            if (headerMetaData != null)
+            if (m_headerMetaData != null)
             {
-                headerMetaData.Dispose();
-                headerMetaData = null;
+                m_headerMetaData.Dispose();
+                m_headerMetaData = null;
             }
             //if (headerWriteStream != null)
             //{
             //    headerWriteStream.Dispose();
             //    headerWriteStream = null;
             //}            
-            if (headerFile != null)
+            if (m_headerFile != null)
             {
-                headerFile.Dispose();
-                headerFile = null;
+                m_headerFile.Dispose();
+                m_headerFile = null;
             }
         }
 

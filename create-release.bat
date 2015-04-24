@@ -6,7 +6,7 @@ set orig_path=%cd%
 
 REM -- Get the current date time in the format YYYY-MM-DD
 set current_date=%DATE:~10,4%-%DATE:~4,2%-%DATE:~7,2%
-set release_dir=release\%current_date%
+set release_dir=release\current
 
 REM -- Update with contents from bin folder and copy to release directory
 lib\utils\echoc 2 Creating release binaries...
@@ -21,28 +21,51 @@ lib\ILMerge\ILMerge.exe /v4 /out:%release_dir%\lib\solumlib.dll /wildcards bin\s
 
 REM -- Compress bin and lib to specific zip files
 lib\utils\echoc 2 Compressing binary release...
-del %release_dir%\%current_date%-solum-bin.zip
+del %release_dir%\..\%current_date%-solum-bin.zip
 cd %release_dir%
-%orig_path%\lib\utils\zip -r %current_date%-solum-bin.zip bin\* -x data
+%orig_path%\lib\utils\zip -r ..\%current_date%-solum-bin.zip bin\*
 cd %orig_path%
 
 lib\utils\echoc 2 Compressing lib release...
-del %release_dir%\%current_date%-solum-lib.zip
+del %release_dir%\..\%current_date%-solum-lib.zip
 cd %release_dir%
-%orig_path%\lib\utils\zip -r %current_date%-solum-lib.zip lib\*
+%orig_path%\lib\utils\zip -r ..\%current_date%-solum-lib.zip lib\*
 cd %orig_path%
 
+REM -- Update DataCollectors if present
+if exist ..\datacollectors\lib (
+	echo.
+	lib\utils\echoc 2 Found data collectors project...
+	set updatedclib=y
+	set /p updatedclib="Update data collectors solum library? [y]/n "
+
+	if "%updatedclib:~0,1%" equ "y" (
+		lib\utils\echoc 2 Removing existing solum library archive...
+		del ..\datacollectors\lib\*-solum*.zip
+		
+		lib\utils\echoc 2 Copying release\%current_date%-solum-lib.zip...
+		copy /y /v release\%current_date%-solum-lib.zip ..\datacollectors\lib\
+		
+		lib\utils\echoc 2 Extracting library...
+		lib\utils\unzip -o ..\datacollectors\lib\*-solum-lib.zip -d ..\datacollectors\lib\solum
+	) else (
+		goto GIT
+	)
+)
+
+
+:GIT
 REM -- Display git status
 git status
 
 REM -- Git Add
 echo.
 set git_add=y
-set /p git_add="Git add the release folder? [y]/n "
+set /p git_add="Git add release? [y]/n "
 
 if "%git_add:~0,1%" equ "y" (
 	lib\utils\echoc 2 Adding...
-	git add -Af %release_dir%
+	git add -Af .\release\*
 ) else (
 	goto COMPLETED
 )

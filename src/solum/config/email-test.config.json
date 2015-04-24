@@ -1,0 +1,18 @@
+﻿{
+    "services": [
+        { 
+            "$type": "solum.core.smtp.EmailService, solum.core",
+            "$name": "test-email-service",
+            "smtp-host": "email-smtp.us-east-1.amazonaws.com",
+            "smtp-port": 587,
+            "ssl-enabled": true,
+            "user-name": "AKIAILPYGV4KJJQ467DA",
+            "password": "AsdIdTsZSJPmrbnSjQ2YMajj+96/PfIX6jCS/QvhF16N",
+            /* 
+               The default from address is optional - but highly recommended.
+               If not set, all messages must set from address explicitly 
+            */
+            "default-from-address": "Geofeedia<no-reply@geofeedia.com>"
+        }
+    ]
+}

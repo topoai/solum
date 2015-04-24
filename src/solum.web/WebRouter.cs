@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Net;
 
@@ -72,12 +73,12 @@ namespace solum.web
             // ** Write the Web response to the HTTP response stream
             response.Write(webResponse.ContentType, webResponse.ContentLength, webResponse.Content);
         }
-        protected override Task OnHandleRequestAsync(HttpListenerRequest request, HttpListenerResponse response)
+        protected override Task OnHandleRequestAsync(HttpListenerRequest request, HttpListenerResponse response, CancellationToken cancellationToken)
         {
             if (m_get_response_async == null)
             {
                 Log.Warn("Async not supported - running sync request in a background thread...");
-                return Task.Run(() => OnHandleRequest(request, response));
+                return Task.Run(() => OnHandleRequest(request, response), cancellationToken);
             }
 
             return m_get_response_async(request);

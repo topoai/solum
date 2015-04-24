@@ -32,9 +32,10 @@ namespace solum.core.http
         {
             var client = new HttpClient();
             
-            var timeoutCancelation = new CancellationTokenSource(timeout);
-            
-            var response = await client.GetAsync(url, timeoutCancelation.Token);
+            var timeoutCancelation = new CancellationTokenSource();
+            timeoutCancelation.CancelAfter((int)timeout.TotalMilliseconds);
+
+            var response = await client.GetAsync(url, HttpCompletionOption.ResponseContentRead, timeoutCancelation.Token);
             var content = await response.Content.ReadAsStringAsync();
 
             return content;

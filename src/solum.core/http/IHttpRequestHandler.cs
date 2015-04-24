@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace solum.core.http
@@ -12,6 +13,6 @@ namespace solum.core.http
         bool AsyncSupported { get; }
         bool AcceptRequest(HttpListenerRequest request);
         void HandleRequest(HttpListenerRequest request, HttpListenerResponse response);
-        Task HandleRequestAsync(HttpListenerRequest request, HttpListenerResponse response);
+        Task HandleRequestAsync(HttpListenerRequest request, HttpListenerResponse response, CancellationToken cancellationToken);
     }
 }

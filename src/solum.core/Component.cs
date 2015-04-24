@@ -9,9 +9,14 @@ namespace solum.core
 {
     public abstract class Component
     {
-        protected Component()
+        protected Component() : this(LogManager.GetCurrentClassLogger())
         {
-            Log = LogManager.GetLogger(GetType().FullName);
+            
+        }
+
+        protected Component(Logger log)
+        {
+            this.Log = log;
         }
 
         protected Logger Log { get; private set; }

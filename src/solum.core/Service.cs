@@ -1,4 +1,5 @@
-﻿using System;
+﻿using solum.core.storage;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -6,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace solum.core
 {
-    public abstract class Service : Component, IDisposable
+    public abstract partial class Service : NamedComponent, IDisposable
     {
         public enum ServiceStatus
         {
@@ -17,22 +18,28 @@ namespace solum.core
             Unloaded
         }
 
-        protected Service()
+        /// <summary>
+        /// Name of service will be deserialized
+        /// </summary>
+        protected Service() { }
+
+        protected Service(string name)
+            : base(name)
         {
             this.Status = ServiceStatus.Initialized;
         }
 
-        public ServiceStatus Status { get; private set; }
+        public ServiceStatus Status { get; private set; }        
 
         public void Load()
         {
             if (Status != ServiceStatus.Initialized)
             {
-                Log.Warn("Service is already loaded.  Load skipped...");
+                Log.Warn("Service {0} is already loaded.  Load skipped...", Name);
                 return;
             }
 
-            Log.Debug("Loading service...");
+            Log.Debug("Loading service: {0}...", Name);
             OnLoad();
             Status = ServiceStatus.Loaded;
         }
@@ -41,11 +48,11 @@ namespace solum.core
             if (Status == ServiceStatus.Initialized)
             {
                 // ** Autoload the service
-                Log.Debug("Autoloading service...");
+                Log.Debug("Autoloading service: {0}...", Name);
                 Load();
             }
 
-            Log.Debug("Starting service...");
+            Log.Debug("Starting service: {0}...", Name);
             OnStart();
             Status = ServiceStatus.Started;
         }
@@ -53,17 +60,17 @@ namespace solum.core
         {
             if (Status >= ServiceStatus.Stopped)
             {
-                Log.Warn("Service is already stopped.  Stop skipped...");
+                Log.Warn("Service {0} is already stopped.  Stop skipped...", Name);
                 return;
             }
 
             if (Status <= ServiceStatus.Loaded)
             {
-                Log.Warn("Service is not started.  Stop skipped...");
+                Log.Warn("Service {0} is not started.  Stop skipped...", Name);
                 return;
             }
 
-            Log.Debug("Stopping service...");
+            Log.Debug("Stopping service: {0}...", Name);
             OnStop();
             Status = ServiceStatus.Stopped;
         }
@@ -71,25 +78,25 @@ namespace solum.core
         {
             if (Status == ServiceStatus.Unloaded)
             {
-                Log.Warn("Service is already unloaded.  Unload skipped...");
+                Log.Warn("Service {0} is already unloaded.  Unload skipped...", Name);
                 return;
             }
 
             if (Status == ServiceStatus.Started)
             {
-                Log.Warn("Service is started.  Stopping before attempting Unload...");
+                Log.Warn("Service {0} is started.  Stopping before attempting Unload...", Name);
                 try
                 {
                     Stop();
                 }
                 catch (Exception ex)
                 {
-                    Log.FatalException("Failed to successfully stop the service! {0}".format(ex), ex);
-                    Log.Info("Proceeding to Unload...");
+                    Log.FatalException("Failed to successfully stop service {0}! {1}".format(Name, ex.Message), ex);
+                    Log.Info("Proceeding to Unload service {0}...", Name);
                 }
             }
 
-            Log.Debug("Unloading service...");
+            Log.Debug("Unloading service: {0}...", Name);
             OnUnload();
             Status = ServiceStatus.Unloaded;
         }

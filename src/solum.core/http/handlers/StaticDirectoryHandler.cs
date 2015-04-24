@@ -6,6 +6,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace solum.core.http.handlers
@@ -35,7 +36,7 @@ namespace solum.core.http.handlers
         }
 
         // TODO: Add caching support
-        protected override Task OnHandleRequestAsync(HttpListenerRequest request, HttpListenerResponse response)
+        protected override Task OnHandleRequestAsync(HttpListenerRequest request, HttpListenerResponse response, CancellationToken cancellationToken)
         {
             var requestPath = sanitizePrefix(request.Url.LocalPath).TrimEnd('/');
 
