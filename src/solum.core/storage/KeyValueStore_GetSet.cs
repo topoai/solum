@@ -92,8 +92,9 @@ namespace solum.core.storage
             return Set(key, bytes);
         }
         public long Set(string key, long value)
-        {            
-            var bytes = BitConverter.GetBytes(value);            
+        {
+            var bytes = BitConverter.GetBytes(value);
+
             return Set(key, bytes);
         }
         public bool Get(string key, out int value)
@@ -117,7 +118,7 @@ namespace solum.core.storage
                 return false;
 
             value = BitConverter.ToInt64(bytes, 0);
-            
+
             return true;
         }
         public void Update(string key, long value)
