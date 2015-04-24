@@ -33,7 +33,7 @@ namespace solum.core.storage
                 var newNumRecords = m_numRecords + 1;
                 var id = newNumRecords;
 
-                // Set the position of this record to the current length of this files
+                // SetValue the position of this record to the current length of this files
                 // var m_dataLength = Interlocked.Add(ref m_dataLength, data.Length);
                 var dataPosition = m_dataLength; // (end of the file)
                 var header = new RecordHeader(id, dataPosition, data.Length);
@@ -48,7 +48,7 @@ namespace solum.core.storage
                 // if all writes are successfull
                 var newDataLength = m_dataLength + record.SizeOf;
 
-                // Set the data file meta data
+                // SetValue the data file meta data
                 m_dataMetaData.Write(DataPositions.NUM_RECORDS_POS, newNumRecords);
                 m_dataMetaData.Write(DataPositions.DATA_LENGTH_POS, newDataLength);
 
@@ -57,7 +57,7 @@ namespace solum.core.storage
                 m_headerStream.Position = headerPosition;
                 header.Write(m_headerWriter);
 
-                // Set the header file meta data
+                // SetValue the header file meta data
                 m_headerMetaData.Write(HeaderPositions.NUM_RECORDS_POS, newNumRecords);
 
                 // ** Increment the values since we are successful
@@ -94,7 +94,7 @@ namespace solum.core.storage
             }
         }
         /// <summary>
-        /// Set the underlying data for the record.
+        /// SetValue the underlying data for the record.
         /// 
         /// NOTE:
         /// Writing more data than was previously allocated is not allow.
