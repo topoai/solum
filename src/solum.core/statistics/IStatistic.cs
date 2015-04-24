@@ -6,8 +6,8 @@ using System.Threading.Tasks;
 
 namespace solum.core.statistics
 {
-    interface IStatistic
+    public interface IStatistic
     {
-
+        public string Name { get; }
     }
 }

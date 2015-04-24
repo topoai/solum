@@ -114,6 +114,7 @@
     <Compile Include="Service.cs" />
     <Compile Include="smtp\EmailService.cs" />
     <Compile Include="statistics\IStatistic.cs" />
+    <Compile Include="statistics\metrics\Counter.cs" />
     <Compile Include="statistics\Statistic.cs" />
     <Compile Include="statistics\StatisticsDatabase.cs" />
     <Compile Include="storage\Database.cs" />
