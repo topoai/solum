@@ -14,23 +14,20 @@ namespace solum.core.statistics
             this.m_storage = storage;
         }
 
-        KeyValueStore m_storage;        
+        KeyValueStore m_storage;
 
-        public void Set<TValue>(string name, TValue value)
+        public void SetValue(string name, long value)
         {
             m_storage.Set(name, value);
         }
-
-        public void Increment(string name)
+        public bool GetValue(string name, out long value)
         {
-            int currentValue;
-                        
-            if (!m_storage.Get(name, out currentValue))
-                currentValue = 0;
-
-            m_storage.Update(name, currentValue + 1);
+            // TODO: Read Write Lock needs to happen here around Get and Update statements
+            return !m_storage.Get(name, out value);
         }
-        public void IncrementL(string name)
+
+        #region Increment a Counter
+        public void Increment(string name)
         {
             long currentValue;
 
@@ -39,5 +36,30 @@ namespace solum.core.statistics
 
             m_storage.Update(name, currentValue + 1);            
         }
+        public void Increment(string name, out long value)
+        {
+            long currentValue;
+
+            // TODO: Read Write Lock needs to happen here around Get and Update statements
+            if (!m_storage.Get(name, out currentValue))
+                currentValue = 0;
+
+            var newValue = currentValue + 1;
+            m_storage.Update(name, newValue);
+
+            value = newValue;
+        }
+        public void Increment(string name, out int value)
+        {
+            long newValue;
+
+            Increment(name, out newValue);
+
+            if (newValue > Int16.MaxValue)
+                throw new IndexOutOfRangeException("The key {0} was incremented but the value {1} is too large to return as an integer (Int32)".format(name, newValue));
+
+            value = (int)newValue;
+        }
+        #endregion
     }
 }
