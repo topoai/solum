@@ -14,17 +14,17 @@ namespace solum.core.storage
         /// </summary>
         /// <param name="data"></param>
         /// <returns></returns>
-        public Record Store(string data)
+        public Record Store(string data, bool autoFlush = false)
         {
             var bytes = SystemSettings.Encoding.GetBytes(data);
-            return Store(bytes);
+            return Store(bytes, autoFlush);
         }
         /// <summary>
         /// Store some binary data as a new record
         /// </summary>
         /// <param name="data"></param>
         /// <returns></returns>
-        public Record Store(byte[] data)
+        public Record Store(byte[] data, bool autoFlush = false)
         {
             using (headerWriteLock)
             using (dataWriteLock)
@@ -61,8 +61,13 @@ namespace solum.core.storage
                 m_headerMetaData.Write(HeaderPositions.NUM_RECORDS_POS, newNumRecords);
 
                 // ** Increment the values since we are successful
-                m_numRecords = id;
+                m_numRecords = newNumRecords;
                 m_dataLength = newDataLength;
+
+                if (autoFlush) {
+                    m_dataStream.Flush();
+                    m_headerStream.Flush();
+                }
 
                 return record;
             }

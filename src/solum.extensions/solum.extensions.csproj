@@ -75,6 +75,7 @@
     <Compile Include="FunctionalExtensions.cs" />
     <Compile Include="GuidExtensions.cs" />
     <Compile Include="JsonExtensions.cs" />
+    <Compile Include="LinqExtensions.cs" />
     <Compile Include="Locks.cs" />
     <Compile Include="ProgramExit.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
