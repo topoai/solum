@@ -53,9 +53,9 @@
     <RootNamespace>solum</RootNamespace>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="NLog, Version=3.2.0.0, Culture=neutral, PublicKeyToken=5120e14c03d0593c, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\NLog.3.2.0.0\lib\net45\NLog.dll</HintPath>
+    <Reference Include="NLog, Version=3.2.1.0, Culture=neutral, PublicKeyToken=5120e14c03d0593c, processorArchitecture=MSIL">
+      <HintPath>..\packages\NLog.3.2.1\lib\net45\NLog.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -1487,10 +1487,6 @@
     <Content Include="assets\js\zurb-responsive-tables\stylesheets\reveal.css" />
     <Content Include="assets\js\zurb-responsive-tables\stylesheets\typography.css" />
     <Content Include="assets\js\zurb-responsive-tables\stylesheets\ui.css" />
-    <Content Include="NLog.config">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-      <SubType>Designer</SubType>
-    </Content>
     <None Include="assets\css\bs-less\alerts.less" />
     <None Include="assets\css\bs-less\badges.less" />
     <None Include="assets\css\bs-less\bootstrap.less" />
@@ -1701,6 +1697,9 @@
     <None Include="config\email-test.config.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <Content Include="NLog.config">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <None Include="NLog.xsd">
       <SubType>Designer</SubType>
     </None>
