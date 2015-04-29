@@ -7,11 +7,14 @@ using System.Net;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
+using NLog;
 
 namespace solum.core.http
 {
     public static class HttpExtensions
     {
+        static Logger Log = LogManager.GetCurrentClassLogger();
+
         public static async Task<string> HttpGetAsync(this string url, Dictionary<string, string> requestHeaders = null)
         {
             var client = new HttpClient();
@@ -30,15 +33,26 @@ namespace solum.core.http
 
         public static async Task<string> HttpGetAsync(this string url, TimeSpan timeout)
         {
-            var client = new HttpClient();
+            using (var client = new HttpClient())
+            {                
+                client.DefaultRequestHeaders.Accept.Clear();
+                client.DefaultRequestHeaders.Accept.Add(
+                    new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/json"));
 
-            var timeoutCancelation = new CancellationTokenSource();
-            timeoutCancelation.CancelAfter((int)timeout.TotalMilliseconds);
+                // ** Set the timeout
+                client.Timeout = timeout;
 
-            var response = await client.GetAsync(url, timeoutCancelation.Token);
-            var content = await response.Content.ReadAsStringAsync();
-
-            return content;
+                HttpResponseMessage response = await client.GetAsync(url);
+                if (response.IsSuccessStatusCode)
+                {
+                    Log.Debug("HttpClient: Request success... Reading content...");
+                    var content = await response.Content.ReadAsStringAsync();
+                    Log.Debug("HttpClient: Content read sucessfully...");
+                    return content;
+                }
+                else
+                    return null;
+            }
         }
 
         public static void Write(this HttpListenerResponse response, string contentType, string content)

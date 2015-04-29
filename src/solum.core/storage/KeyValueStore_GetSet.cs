@@ -19,7 +19,7 @@ namespace solum.core.storage
         {
             ensureOpened();
 
-            lock (m_index)
+            //lock (m_index)
             {
                 // ** Check if the key already exits
                 int existingId = -1;
@@ -47,7 +47,7 @@ namespace solum.core.storage
         {
             ensureOpened();
 
-            lock (m_index)
+            //lock (m_index)
             {
                 value = null;
 
@@ -69,7 +69,7 @@ namespace solum.core.storage
 
             int id;
             bool exists;
-            lock (m_index)
+            //lock (m_index)
             {
                 exists = m_index.Get(key, out id);
 

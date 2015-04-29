@@ -75,7 +75,9 @@ namespace solum.core.storage
             m_database.Close();
 
             Log.Debug("Shutting down the index...");
-            m_index.Shutdown();
+            //m_index.SaveIndex();
+            if (m_index != null)
+                m_index.Shutdown();
         }
         
 
@@ -83,7 +85,7 @@ namespace solum.core.storage
         {
             ensureOpened();
 
-            lock (m_index)
+            //lock (m_index)
             {
                 // ** Search for the key in the index
                 int id;
@@ -105,7 +107,7 @@ namespace solum.core.storage
             ensureOpened();
 
             int id;
-            lock (m_index)
+            //(m_index)
                 return m_index.Get(key, out id);
         }
 
