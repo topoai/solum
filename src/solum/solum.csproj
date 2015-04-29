@@ -1738,13 +1738,8 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>REM -- COPY ASSETS
-mkdir $(TargetDir)assets
-xcopy /F /D /S /Y $(ProjectDir)assets\* $(TargetDir)assets
-
-REM -- COPY VIEWS
-mkdir $(TargetDir)views
-xcopy /F /S /Y $(ProjectDir)views $(TargetDir)views</PostBuildEvent>
+    <PostBuildEvent>
+    </PostBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
