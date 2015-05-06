@@ -7,6 +7,9 @@
         },
         {
             "$type": "solum.modules.DatabasesModule, solum"
+        },
+        {
+            "$type": "solum.modules.WeibosModule, solum"
         }
     ],
     "static-directories": {

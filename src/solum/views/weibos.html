@@ -1,0 +1,152 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Solum Admin Panel" />
+    <meta name="author" content="Brad Serbu" />
+    <title>Solum | Weibos</title>
+    {{> header-assets}}
+</head>
+<body class="page-body  page-left-in" data-url="http://neon.dev">
+    <div class="page-container">
+        <!-- add class "sidebar-collapsed" to close sidebar by default, "chat-visible" to make chat appear always -->
+        {{> sidebar}}
+        <div class="main-content">
+            <div class="row" id="header-content">
+            </div>
+            <hr />
+            <div class="row">
+                <div class="col-sm-12">
+                    <div class="well">
+                        <h1>Weibo Collector</h1>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-sm-12">
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            <div class="panel-title"></div>
+
+                            <div class="panel-options">
+                                <a href="#sample-modal" data-toggle="modal" data-target="#sample-modal-dialog-1" class="bg"><i class="entypo-cog"></i></a>
+                                <a href="#" data-rel="collapse"><i class="entypo-down-open"></i></a>
+                                <a href="#" data-rel="reload"><i class="entypo-arrows-ccw"></i></a>
+                                <a href="#" data-rel="close"><i class="entypo-cancel"></i></a>
+                            </div>
+                        </div>
+
+                        <div id="weibos-by-minute-container">
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {{> main-footer}}
+        </div>
+    </div>
+    <script type="text/javascript" src="assets/saved-weibos-1min.js"></script>
+    <script type="text/javascript">
+        jQuery(document).ready(function ($) {
+            // ** Activate Sidebar
+            //$('#sidebar_storage').addClass('active');
+            //$('#sidebar_storage').addClass('opened');
+            //$('#sidebar_storage_databases').addClass('active');
+
+            Highcharts.setOptions({
+                global: {
+                    useUTC: false
+                }
+            });
+
+            $('#weibos-by-minute-container').highcharts({
+                chart: {
+                    type: "areaspline",                    
+                    zoomType: 'x',
+                    marginRight: 10,
+                },
+                plotOptions: {
+                    areaspline: {
+                        fillColor: {
+                            linearGradient: { x1: 0, y1: 0, x2: 0, y2: 1 },
+                            stops: [
+                                [0, Highcharts.getOptions().colors[0]],
+                                [1, Highcharts.Color(Highcharts.getOptions().colors[0]).setOpacity(0).get('rgba')]
+                            ]
+                        },
+                        marker: {
+                            radius: 2
+                        },
+                        lineWidth: 1,
+                        states: {
+                            hover: {
+                                lineWidth: 1
+                            }
+                        },
+                        threshold: null,
+                    },
+                },
+                title: {
+                    text: 'Geo Weibos By Minute'
+                },
+                xAxis: {
+                    type: 'datetime',
+                    tickPixelInterval: 150
+                },
+                yAxis: {
+                    title: {
+                        text: 'Value'
+                    },
+                    /*
+                    plotLines: [{
+                        value: 0,
+                        width: 1,
+                        color: '#808080'
+                    }]*/
+                },
+                tooltip: {
+                    formatter: function () {
+                        return '<b>' + this.series.name + '-' + Highcharts.numberFormat(this.y, 2) + '</b><br/>' +
+                            Highcharts.dateFormat('%Y-%m-%d %H:%M:%S', this.x) + '<br/>';
+                    }
+                },
+                legend: {
+                    enabled: false
+                },
+                exporting: {
+                    enabled: false
+                },
+                series: [{
+                    name: 'Geo Weibos',
+                    data: weibosByMinute
+                }]
+            });
+        });
+    </script>
+
+    <!-- Imported styles on this page -->
+    <link rel="stylesheet" href="assets/js/jvectormap/jquery-jvectormap-1.2.2.css">
+    <link rel="stylesheet" href="assets/js/rickshaw/rickshaw.min.css">
+
+    {{> footer-assets}}
+
+    <script src="http://code.highcharts.com/highcharts.js"></script>
+
+    <!-- Imported scripts on this page -->
+    <script src="assets/js/jquery.sparkline.min.js"></script>
+    <script src="assets/js/rickshaw/vendor/d3.v3.js"></script>
+    <script src="assets/js/rickshaw/rickshaw.min.js"></script>
+    <script src="assets/js/raphael-min.js"></script>
+    <script src="assets/js/morris.min.js"></script>
+    <script src="assets/js/toastr.js"></script>
+
+    <!-- JavaScripts initializations and stuff -->
+    <script src="assets/js/neon-custom.js"></script>
+
+
+</body>
+</html>
