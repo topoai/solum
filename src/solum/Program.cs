@@ -17,9 +17,9 @@ namespace solum
 
         static void Main(string[] args)
         {
-            RunEmailTest();
+            //RunEmailTest();
             //RunKeyValueTest();
-            //Server.RunServer();
+            Server.RunServer();
             // RunProcessTests();
         }
 
