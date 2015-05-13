@@ -23,7 +23,7 @@ namespace solum.core.storage
 
         public KeyValueStore(DirectoryInfo dataDirectory, string name, Encoding encoding)
         {
-            // ** Undelying data store
+            // ** Underlying data store
             this.m_database = new Database(dataDirectory, name, encoding);
 
             this.Name = name;

@@ -51,15 +51,17 @@ namespace solum.core.storage
         {
             bool dataFileExits = m_dataFileInfo.Exists;
 
-            if (dataFileExits == false)
-            {
-                // Fix for MONO as CreateFromFile (OpenOrCreate) mode doesn't work.
-                FileStream fs = new FileStream(m_dataFileInfo.FullName, FileMode.CreateNew);
-                fs.Seek(MAX_DATA_FILE_SIZE, SeekOrigin.Begin);
-                fs.WriteByte(0);
-                fs.Close();
-                fs.Dispose();
-            }
+			if (dataFileExits == false) {
+				Log.Debug ("Creating a new data file... {0}", m_dataFileInfo.FullName);
+				// Fix for MONO as CreateFromFile (OpenOrCreate) mode doesn't work.
+				FileStream fs = new FileStream (m_dataFileInfo.FullName, FileMode.CreateNew);
+				fs.Seek (MAX_DATA_FILE_SIZE, SeekOrigin.Begin);
+				fs.WriteByte (0);
+				fs.Close ();
+				fs.Dispose ();
+			} else {
+				Log.Trace ("Using existing data file... {0}", m_dataFileInfo.FullName);
+			}
 
             Log.Debug("Opening data file...   {0}", m_dataFileInfo.FullName);
             //m_dataFile = MemoryMappedFile.CreateFromFile(m_dataFileInfo.FullName, FileMode.Open, "{0}-data".format(Name));
