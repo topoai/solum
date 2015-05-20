@@ -7,13 +7,13 @@ using System.Net;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
-using NLog;
+using Serilog;
 
 namespace solum.core.http
 {
     public static class HttpExtensions
     {
-        static Logger Log = LogManager.GetCurrentClassLogger();
+        static ILogger Log = Serilog.Log.ForContext(typeof(HttpExtensions));
 
         public static async Task<string> HttpGetAsync(this string url, Dictionary<string, string> requestHeaders = null)
         {

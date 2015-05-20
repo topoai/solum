@@ -17,8 +17,8 @@ namespace solum.core.http.handlers
 
         protected override Task OnHandleRequestAsync(HttpListenerRequest request, HttpListenerResponse response, CancellationToken cancellationToken)
         {
-            //Log.Warn("Async not supported.");
-            //Log.Trace("Running Sync Request Handler in a background thread.");
+            //Log.Warning("Async not supported.");
+            //Log.Verbose("Running Sync Request Handler in a background thread.");
             //return Task.Run(() => OnHandleRequest(request, response));
             throw new Exception("Sync http handlers do not support async invokation");
         }

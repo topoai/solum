@@ -62,7 +62,7 @@ namespace solum.web
             // ** Run async action Synchronously
             if (m_get_response == null)
             {
-                Log.Warn("Running async request handler in syncronous mode...");
+                Log.Warning("Running async request handler in syncronous mode...");
                 webResponse = m_get_response_async(request).Result;
             }
             else
@@ -77,7 +77,7 @@ namespace solum.web
         {
             if (m_get_response_async == null)
             {
-                Log.Warn("Async not supported - running sync request in a background thread...");
+                Log.Warning("Async not supported - running sync request in a background thread...");
                 return Task.Run(() => OnHandleRequest(request, response), cancellationToken);
             }
 

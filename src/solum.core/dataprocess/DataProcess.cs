@@ -110,7 +110,7 @@ namespace solum.core.dataprocess
             {
                 if (links.Contains(link))
                 {
-                    Log.Warn("Ignoring duplicate link.");
+                    Log.Warning("Ignoring duplicate link.");
                     continue;
                 }
 

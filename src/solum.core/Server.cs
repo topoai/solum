@@ -30,26 +30,26 @@ namespace solum.core
 
         protected override void OnLoad()
         {
-            Log.Info("Loading server...");
+            Log.Information("Loading server...");
 
-            Log.Trace("DEFAULT ENCODING = {0}", SystemSettings.Encoding.EncodingName);
+            Log.Verbose("DEFAULT ENCODING = {0}", SystemSettings.Encoding.EncodingName);
 
-            Log.Info("Loading storage engine...");
+            Log.Information("Loading storage engine...");
             Storage.Open();
 
-            Log.Info("Loading services...");
+            Log.Information("Loading services...");
             Services.ForEach(s => s.Load());
 
             base.OnLoad();
         }
         protected override void OnStart()
         {
-            Log.Info("Starting services...");
+            Log.Information("Starting services...");
             Services.ForEach(s => s.Start());
         }
         protected override void OnStop()
         {
-            Log.Info("Stopping services...");
+            Log.Information("Stopping services...");
             Services.ForEach(service =>
             {
                 if (service.Status == ServiceStatus.Started)
@@ -58,13 +58,13 @@ namespace solum.core
         }
         protected override void OnUnload()
         {
-            Log.Info("Unloading services...");
+            Log.Information("Unloading services...");
             Services.ForEach(service =>
             {
                 service.Unload();
             });
 
-            Log.Info("Closing storage...");
+            Log.Information("Closing storage...");
             Storage.Close();
 
             base.OnUnload();

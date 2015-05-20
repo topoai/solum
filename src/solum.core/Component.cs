@@ -1,4 +1,4 @@
-﻿using NLog;
+﻿using Serilog;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,16 +9,16 @@ namespace solum.core
 {
     public abstract class Component
     {
-        protected Component() : this(LogManager.GetCurrentClassLogger())
+        protected Component()
         {
-            
+            this.Log = Serilog.Log.ForContext(this.GetType());
         }
 
-        protected Component(Logger log)
+        protected Component(ILogger log)
         {
             this.Log = log;
         }
 
-        protected Logger Log { get; private set; }
+        protected ILogger Log { get; private set; }
     }
 }

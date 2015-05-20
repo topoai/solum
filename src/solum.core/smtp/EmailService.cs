@@ -64,7 +64,7 @@ namespace solum.core.smtp
             }
 
             if (string.IsNullOrEmpty(DefaultFromAddress))
-                Log.Warn("No default from address specified... All messages must specify a From address to send a message.");
+                Log.Warning("No default from address specified... All messages must specify a From address to send a message.");
             else
                 Log.Debug("Default From Address: {0}".format(DefaultFromAddress));
 
@@ -89,7 +89,7 @@ namespace solum.core.smtp
             m_message_queue.Complete();
 
             // ** Complete sending all messages
-            Log.Info("Waiting for {0} queued messages to send...".format(m_message_queue.InputCount));
+            Log.Information("Waiting for {0} queued messages to send...".format(m_message_queue.InputCount));
             m_message_queue.Completion.Wait();
 
             // ** TODO: Save any pending/failed messages to disk
@@ -138,7 +138,7 @@ namespace solum.core.smtp
             }
             catch (Exception ex)
             {
-                Log.ErrorException("Error sending email message: {0}".format(message.ToJson(indent: true)), ex);
+                Log.Error(ex, "Error sending email message: {0}".format(message.ToJson(indent: true)));
                 m_stats.Increment("emails-failed");
 
                 // ** TODO: Save to failure queue or try message again...

@@ -1,4 +1,4 @@
-﻿using NLog;
+﻿using Serilog;
 using solum.core;
 using solum.core.dataprocess;
 using solum.core.smtp;
@@ -13,7 +13,7 @@ namespace solum
 {
     class Program
     {
-        static Logger Log = LogManager.GetLogger("main");
+        static ILogger Log = Log.ForContext(typeof(Program));
 
         static void Main(string[] args)
         {
@@ -61,12 +61,12 @@ namespace solum
             //var count = 0;
             //process.OnEntryProcessed += (_, entry) =>
             //{
-            //    Log.Info("Processed entry #{0:N}", ++count);
+            //    Log.Information("Processed entry #{0:N}", ++count);
             //};
 
             //process.OnFinished += (_, __) =>
             //{
-            //    Log.Info("Processed {0} items.", count);
+            //    Log.Information("Processed {0} items.", count);
             //};
 
             //process.Run();
@@ -76,15 +76,15 @@ namespace solum
         {
             var count = 0;
             var process = DataProcess.With(SayHello(10))
-                                     .Do(hello => Log.Info(hello))
+                                     .Do(hello => Log.Information(hello))
                                      .Then(_ =>
                                      {
-                                         Log.Info("Waiting 100 ms...");
+                                         Log.Information("Waiting 100 ms...");
                                          Thread.Sleep(100);
                                      })
                                      .Then(hello =>
                                      {
-                                         Log.Info("\t#{0:N}", ++count);
+                                         Log.Information("\t#{0:N}", ++count);
 
                                          return new
                                          {
@@ -92,7 +92,7 @@ namespace solum
                                              count = count
                                          };
                                      })
-                                    .Then(hello => Log.Info("\t {0}", hello))
+                                    .Then(hello => Log.Information("\t {0}", hello))
                                     .Process;
 
             return process;
@@ -101,15 +101,15 @@ namespace solum
         {
             var count = 0;
             var process = DataProcess.With(SayHello(10))
-                                     .Do(hello => Log.Info(hello))
+                                     .Do(hello => Log.Information(hello))
                                      .Do(_ =>
                                      {
-                                         Log.Info("Waiting 100 ms...");
+                                         Log.Information("Waiting 100 ms...");
                                          Thread.Sleep(100);
                                      })
                                      .Do(hello =>
                                      {
-                                         Log.Info("\t#{0:N}", ++count);
+                                         Log.Information("\t#{0:N}", ++count);
 
                                          return new
                                          {
@@ -117,7 +117,7 @@ namespace solum
                                              count = count
                                          };
                                      })
-                                    .Then(hello => Log.Info("\t {0}", hello))
+                                    .Then(hello => Log.Information("\t {0}", hello))
                                     .Process;
 
             return process;
@@ -126,15 +126,15 @@ namespace solum
         {
             var count = 0;
             var process = DataProcess.With(SayHello(10))
-                                     .Do(hello => Log.Info(hello))
+                                     .Do(hello => Log.Information(hello))
                                      .Do(_ =>
                                      {
-                                         Log.Info("Waiting 100 ms...");
+                                         Log.Information("Waiting 100 ms...");
                                          Thread.Sleep(100);
                                      })
                                      .Do(hello =>
                                      {
-                                         Log.Info("\t#{0:N}", ++count);
+                                         Log.Information("\t#{0:N}", ++count);
 
                                          return new
                                          {
@@ -142,7 +142,7 @@ namespace solum
                                              count = count
                                          };
                                      })
-                                    .Then(hello => Log.Info("\t {0}", hello))
+                                    .Then(hello => Log.Information("\t {0}", hello))
                                     .Process;
 
             return process;

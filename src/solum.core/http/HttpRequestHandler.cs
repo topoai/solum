@@ -48,7 +48,7 @@ namespace solum.core.http
             }
             catch (FileNotFoundException ex)
             {
-                Log.ErrorException("Error handling request: {0}".format(ex), ex);
+                Log.Error(ex, "Error handling request: {0}".format(ex));
 
                 response.StatusCode = 404;
                 response.StatusDescription = ex.Message.RemoveControlCharacters();

@@ -108,22 +108,22 @@ namespace solum.core.http
                 //    not some other issue such as running two servers as once
                 if (ex.ErrorCode != ACCESS_DENIED_ERROR_CODE)
                 {
-                    Log.ErrorException("Failed to start http listener.", ex);
+                    Log.Error(ex, "Failed to start http listener.");
                     throw ex;
                 }
 
                 // ** Check if automatic registration is disabled
                 if (NetshRegistrationEnabled == false)
                 {
-                    Log.ErrorException("Access denied received and Automatic Netsh Registration is disabled.", ex);
+                    Log.Error(ex, "Access denied received and Automatic Netsh Registration is disabled.");
                     throw ex;
                 }
 
-                Log.WarnException("Access denied received when opening server listener.", ex);
+                Log.Warning(ex, "Access denied received when opening server listener.");
                 Log.Debug("Registering urls with netsh to provide access to the user account \"{0}\".", NetshRegistraionUser);
                 foreach (var address in Addresses)
                 {
-                    Log.Info("Registering address... {0}", address);
+                    Log.Information("Registering address... {0}", address);
                     var registrationSucceeded = NetSh.AddUrlAcl(SanitizeUrl(address), NetshRegistraionUser);
                     if (registrationSucceeded == false)
                         throw new Exception("Error registering address using netsh: {0}".format(address));
@@ -131,8 +131,8 @@ namespace solum.core.http
 
                 // ** Since we automatically registered the addresses using netsh
                 //    Retry starting the service
-                Log.Info("Registration successful...");
-                Log.Info("Restarting listener...");
+                Log.Information("Registration successful...");
+                Log.Information("Restarting listener...");
                 StartHttpListener();
             }
 
@@ -157,7 +157,7 @@ namespace solum.core.http
             var numActiveRequests = m_active_requests.Count;
             if (numActiveRequests > 0)
             {
-                Log.Warn("Waiting for {0} active requests to complete.", m_active_requests.Count);
+                Log.Warning("Waiting for {0} active requests to complete.", m_active_requests.Count);
                 Task.WaitAll(m_active_requests.Values.ToArray());
             }
 
@@ -165,7 +165,7 @@ namespace solum.core.http
             /*var numActiveRequests = m_process_request_block.InputCount;
             if (numActiveRequests > 0)
             {
-                Log.Warn("Waiting for {0} active requests to complete.", m_receive_request_block.Count);
+                Log.Warning("Waiting for {0} active requests to complete.", m_receive_request_block.Count);
                 m_receive_request_block.Complete();
                 m_process_request_block.Completion.Wait();
             }*/
@@ -174,7 +174,7 @@ namespace solum.core.http
             Log.Debug("Stopping the http listener...");
             m_listener.Stop();
 
-            Log.Info("Processed {0:N0} total requests.", m_requests_received);
+            Log.Information("Processed {0:N0} total requests.", m_requests_received);
 
             base.OnStop();
         }
@@ -188,14 +188,14 @@ namespace solum.core.http
             {
                 address = SanitizeUrl(address);
 
-                Log.Trace("Registering address: {0}", address);
+                Log.Verbose("Registering address: {0}", address);
                 m_listener.Prefixes.Add(address);
             });
 
             Log.Debug("Starting HTTP listener...");
             m_listener.Start();
 
-            Addresses.ForEach(address => Log.Info("Listening on address: {0}", address));
+            Addresses.ForEach(address => Log.Information("Listening on address: {0}", address));
         }
         async Task HandleRequestsAsync()
         {
@@ -206,7 +206,7 @@ namespace solum.core.http
             {
                 //checkPendingQueueSize();
 
-                Log.Trace("Waiting for request...");
+                Log.Verbose("Waiting for request...");
                 var context = await m_listener.GetContextAsync();
 
                 var requestNum = ++m_requests_received;
@@ -244,7 +244,7 @@ namespace solum.core.http
             Log.Debug("- Request:Number.............. #{0:N0}", requestNum);
 
             if (httpContext.Elapsed.TotalMilliseconds > 1000)
-                Log.Warn("- Request:Queued.............. {0:N2}ms", httpContext.Elapsed.TotalMilliseconds);
+                Log.Warning("- Request:Queued.............. {0:N2}ms", httpContext.Elapsed.TotalMilliseconds);
             else
                 Log.Debug("- Request:Queued.............. {0:N2}ms", httpContext.Elapsed.TotalMilliseconds);
 
@@ -260,7 +260,7 @@ namespace solum.core.http
             var handler = Handlers.FirstOrDefault(h => h.AcceptRequest(request));
             if (handler == null)
             {
-                Log.Warn("No Handler found for request: {0}", request.RawUrl);
+                Log.Warning("No Handler found for request: {0}", request.RawUrl);
                 response.StatusCode = 404;
             }
             else
@@ -270,12 +270,12 @@ namespace solum.core.http
                 {
                     if (handler.AsyncSupported)
                     {
-                        Log.Trace("Handling request asyncronously...");
+                        Log.Verbose("Handling request asyncronously...");
                         await handler.HandleRequestAsync(request, response, httpContext.CancellationToken);
                     }
                     else
                     {
-                        Log.Trace("Handling request syncronously...");
+                        Log.Verbose("Handling request syncronously...");
                         await Task.Run(() => handler.HandleRequest(request, response), httpContext.CancellationToken);
                         //handler.HandleRequest(request, response);
                     }
@@ -283,7 +283,7 @@ namespace solum.core.http
                 catch (OperationCanceledException ex)
                 {
                     // Log.Error("Error Code: {0}", ex.ErrorCode);
-                    Log.ErrorException("The request timed out after {0} seconds before completing...".format(RequestHandlerTimeout.TotalSeconds), ex);
+                    Log.Error(ex, "The request timed out after {0} seconds before completing...".format(RequestHandlerTimeout.TotalSeconds));
 
                     response.StatusCode = 500;
                     response.StatusDescription = "The request timed out after {0} seconds before completing...".format(RequestHandlerTimeout.TotalSeconds).RemoveControlCharacters();
@@ -291,7 +291,7 @@ namespace solum.core.http
                 catch (Exception ex)
                 {
                     // Log.Error("Error Code: {0}", ex.ErrorCode);
-                    Log.ErrorException("Error handling request: {0}".format(ex), ex);
+                    Log.Error(ex, "Error handling request: {0}".format(ex));
 
                     response.StatusCode = 500;
                     response.StatusDescription = "Error handling request: {0}".format(ex).RemoveControlCharacters();
@@ -299,9 +299,9 @@ namespace solum.core.http
             }
 
             // ** Flush and close the response
-            Log.Trace("Flushing response stream...");
+            Log.Verbose("Flushing response stream...");
             response.OutputStream.Flush();
-            Log.Trace("Closing response stream...");
+            Log.Verbose("Closing response stream...");
             response.OutputStream.Close();
 
             processTimer.Stop();
@@ -311,7 +311,7 @@ namespace solum.core.http
 
             var elapsedTimeMilliseconds = httpContext.Elapsed.TotalMilliseconds;
             if (elapsedTimeMilliseconds > 1000)
-                Log.Warn("- Request:ElapsedTime......... {0:N2}ms", httpContext.Elapsed.TotalMilliseconds);
+                Log.Warning("- Request:ElapsedTime......... {0:N2}ms", httpContext.Elapsed.TotalMilliseconds);
             else
                 Log.Debug("- Request:ElapsedTime......... {0:N2}ms", httpContext.Elapsed.TotalMilliseconds);
 

@@ -58,7 +58,7 @@ namespace solum.web
                 var prefix = kvp.Key;
                 var directory = kvp.Value;
 
-                Log.Trace("- Mapping: {0} -> {1}", prefix, directory);
+                Log.Verbose("- Mapping: {0} -> {1}", prefix, directory);
 
                 var staticFileHandler = new StaticDirectoryHandler(prefix, directory);
                 m_listener.Handlers.Add(staticFileHandler);

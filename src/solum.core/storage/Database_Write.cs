@@ -39,7 +39,7 @@ namespace solum.core.storage
                 var header = new RecordHeader(id, dataPosition, data.Length);
                 var record = new Record(id, data);
 
-                // Log.Trace("Writing record #{0} - {1} bytes", header.Id, header.Length);
+                // Log.Verbose("Writing record #{0} - {1} bytes", header.Id, header.Length);
                 // Position data stream at the end
                 m_dataStream.Position = DataPositions.DATA_OFFSET + dataPosition;
                 record.Write(m_dataWriter);
@@ -125,7 +125,7 @@ namespace solum.core.storage
                 var newHeader = new RecordHeader(id, dataPosition, data.Length);
                 var newRecord = new Record(id, data);
 
-                // Log.Trace("Writing record #{0} - {1} bytes", header.Id, header.Length);
+                // Log.Verbose("Writing record #{0} - {1} bytes", header.Id, header.Length);
                 // Position the data stream
                 m_dataStream.Position = DataPositions.DATA_OFFSET + dataPosition;
                 newRecord.Write(m_dataWriter);

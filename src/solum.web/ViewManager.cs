@@ -26,29 +26,29 @@ namespace solum.web
         {
             if (Directory.Exists(TemplatesDirectory) == false)
             {
-                Log.Warn("Templates directory not found: {0}", TemplatesDirectory);
+                Log.Warning("Templates directory not found: {0}", TemplatesDirectory);
                 return;
             }
 
             var templateFiles = Directory.GetFiles(TemplatesDirectory);
 
-            Log.Trace("Found {0:N} files in the templates directory.", templateFiles.Length);
+            Log.Verbose("Found {0:N} files in the templates directory.", templateFiles.Length);
             foreach (var templateFileName in templateFiles)
             {
                 Log.Debug("Processing template file... {0}", templateFileName);
 
                 var templateName = Path.GetFileNameWithoutExtension(templateFileName);
-                Log.Trace("Processing template name... {0}", templateName);
+                Log.Verbose("Processing template name... {0}", templateName);
 
-                Log.Trace("Reading file contents...");
+                Log.Verbose("Reading file contents...");
                 var contents = File.ReadAllText(templateFileName);                
 
                 using (var reader = new StringReader(contents))
                 {
-                    Log.Trace("Compiling template...", templateName);
+                    Log.Verbose("Compiling template...", templateName);
                     var template = Handlebars.Compile(reader);
 
-                    Log.Trace("Registering template...");
+                    Log.Verbose("Registering template...");
                     Handlebars.RegisterTemplate(templateName, template);
                 }
             }

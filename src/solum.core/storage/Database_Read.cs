@@ -73,7 +73,7 @@ namespace solum.core.storage
 
                 // ** Reposition the data stream
                 m_dataStream.Position = DataPositions.DATA_OFFSET + header.Offset;
-                Log.Trace("Reading record id={0} length={1}", id, header.Length);
+                Log.Verbose("Reading record id={0} length={1}", id, header.Length);
 
                 var record = Record.Read(m_dataStream);
                 return record;

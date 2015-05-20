@@ -60,7 +60,7 @@ namespace solum.core.storage
 				fs.Close ();
 				fs.Dispose ();
 			} else {
-				Log.Trace ("Using existing data file... {0}", m_dataFileInfo.FullName);
+				Log.Verbose ("Using existing data file... {0}", m_dataFileInfo.FullName);
 			}
 
             Log.Debug("Opening data file...   {0}", m_dataFileInfo.FullName);
@@ -134,13 +134,13 @@ namespace solum.core.storage
         }        
         private void closeDataResources()
         {
-            Log.Trace("Flushing data resources...");            
+            Log.Verbose("Flushing data resources...");            
             m_dataWriter.Flush();
             m_dataMetaData.Flush();
             m_dataStream.Flush();
             //dataWriteStream.Flush();            
 
-            Log.Trace("Disposing data resources...");
+            Log.Verbose("Disposing data resources...");
             if (m_dataWriter != null)
             {
                 m_dataWriter.Dispose();
@@ -169,13 +169,13 @@ namespace solum.core.storage
         }
         private void closeHeaderResources()
         {
-            Log.Trace("Flushing header resources...");            
+            Log.Verbose("Flushing header resources...");            
             m_headerWriter.Flush();
             m_headerMetaData.Flush();
             m_headerStream.Flush();
             //headerWriteStream.Flush();
 
-            Log.Trace("Closing header resources...");
+            Log.Verbose("Closing header resources...");
             if (m_headerWriter != null)
             {
                 m_headerWriter.Dispose();

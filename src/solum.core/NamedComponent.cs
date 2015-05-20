@@ -1,5 +1,5 @@
 ﻿using Newtonsoft.Json;
-using NLog;
+using Serilog;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,7 +15,7 @@ namespace solum.core
         /// </summary>
         protected NamedComponent() { }
 
-        protected NamedComponent(string name) : base(LogManager.GetLogger(name))
+        protected NamedComponent(string name) : base()
         {
             this.Name = name;
         }

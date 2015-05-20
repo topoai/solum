@@ -17,7 +17,7 @@ namespace solum.core.http.handlers
 
         protected override void OnHandleRequest(HttpListenerRequest request, HttpListenerResponse response)
         {
-            //Log.Warn("Running async request handler in syncronous mode.");
+            //Log.Warning("Running async request handler in syncronous mode.");
             //OnHandleRequestAsync(request, response).RunSynchronously();
             throw new NotSupportedException("Async handlers do not support syncronous invokation.");
         }

@@ -47,7 +47,7 @@ namespace solum.core.storage
         {
             if (IsOpened)
             {
-                Log.Warn("Key Value Store already opened. {0}", Name);
+                Log.Warning("Key Value Store already opened. {0}", Name);
                 return;
             }
 
@@ -67,7 +67,7 @@ namespace solum.core.storage
         {
             if (!IsOpened)
             {
-                Log.Warn("The database is not opened.  {0}", Name);
+                Log.Warning("The database is not opened.  {0}", Name);
                 return;
             }
 

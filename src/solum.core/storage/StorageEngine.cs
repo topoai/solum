@@ -26,12 +26,12 @@ namespace solum.core.storage
 
         public void Open()
         {
-            Log.Info("Opening storage engine...");
+            Log.Information("Opening storage engine...");
 
             // ** Ensure the data directory exists                        
             if (!DataDirectory.Exists)
             {
-                Log.Info("Creating data directory: {0}...", DataDirectory);
+                Log.Information("Creating data directory: {0}...", DataDirectory);
                 DataDirectory.Create();
                 Log.Debug("Successfully created data directory: {0}", DataDirectory);
             }
@@ -47,7 +47,7 @@ namespace solum.core.storage
             // ** The requested database has not been previously opened            
             var database = new Database(DataDirectory, name, SystemSettings.Encoding);
 
-            Log.Info("Opening database... {0}", name);            
+            Log.Information("Opening database... {0}", name);            
             database.Open();
 
             m_databases.Add(database);
@@ -64,7 +64,7 @@ namespace solum.core.storage
             // ** The requested database has not been previously opened            
             var keyValueStore = new KeyValueStore(DataDirectory, name, SystemSettings.Encoding);
 
-            Log.Info("Opening key value store... {0}", name);
+            Log.Information("Opening key value store... {0}", name);
             keyValueStore.Open();
 
             m_kv_stores.Add(keyValueStore);
@@ -84,10 +84,10 @@ namespace solum.core.storage
 
         public void Close()
         {
-            Log.Info("Closing open databases...");
+            Log.Information("Closing open databases...");
             m_databases.ForEach(d => d.Close());
 
-            Log.Info("Closing open key value stores...");
+            Log.Information("Closing open key value stores...");
             m_kv_stores.ForEach(d => d.Close());
         }
 

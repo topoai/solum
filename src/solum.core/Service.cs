@@ -35,7 +35,7 @@ namespace solum.core
         {
             if (Status != ServiceStatus.Initialized)
             {
-                Log.Warn("Service {0} is already loaded.  Load skipped...", Name);
+                Log.Warning("Service {0} is already loaded.  Load skipped...", Name);
                 return;
             }
 
@@ -60,13 +60,13 @@ namespace solum.core
         {
             if (Status >= ServiceStatus.Stopped)
             {
-                Log.Warn("Service {0} is already stopped.  Stop skipped...", Name);
+                Log.Warning("Service {0} is already stopped.  Stop skipped...", Name);
                 return;
             }
 
             if (Status <= ServiceStatus.Loaded)
             {
-                Log.Warn("Service {0} is not started.  Stop skipped...", Name);
+                Log.Warning("Service {0} is not started.  Stop skipped...", Name);
                 return;
             }
 
@@ -78,21 +78,21 @@ namespace solum.core
         {
             if (Status == ServiceStatus.Unloaded)
             {
-                Log.Warn("Service {0} is already unloaded.  Unload skipped...", Name);
+                Log.Warning("Service {0} is already unloaded.  Unload skipped...", Name);
                 return;
             }
 
             if (Status == ServiceStatus.Started)
             {
-                Log.Warn("Service {0} is started.  Stopping before attempting Unload...", Name);
+                Log.Warning("Service {0} is started.  Stopping before attempting Unload...", Name);
                 try
                 {
                     Stop();
                 }
                 catch (Exception ex)
                 {
-                    Log.FatalException("Failed to successfully stop service {0}! {1}".format(Name, ex.Message), ex);
-                    Log.Info("Proceeding to Unload service {0}...", Name);
+                    Log.Fatal(ex, "Failed to successfully stop service {0}! {1}".format(Name, ex.Message));
+                    Log.Information("Proceeding to Unload service {0}...", Name);
                 }
             }
 
