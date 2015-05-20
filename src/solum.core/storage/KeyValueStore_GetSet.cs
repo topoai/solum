@@ -30,7 +30,7 @@ namespace solum.core.storage
                 }
 
                 // ** Store the new newValue as a record            
-                var record = m_database.Store(value);
+                var record = m_database.Store(value, true);
 
                 // ** Index the record id with the key
                 var id = record.Id;
