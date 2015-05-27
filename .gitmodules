@@ -5,3 +5,6 @@
 [submodule "lib/Handlebars.Net"]
 	path = lib/Handlebars.Net
 	url = https://github.com/bradserbu/Handlebars.Net
+[submodule "lib/Lightning.NET"]
+	path = lib/Lightning.NET
+	url = https://github.com/bradserbu/Lightning.NET.git
