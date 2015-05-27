@@ -19,8 +19,7 @@ namespace solum
         static void Main(string[] args)
         {
             //RunEmailTest();
-            //RunKeyValueTest();
-            RunKeyValue2Test();
+            RunKeyValueTest();            
             // Server.RunServer();
             // RunProcessTests();
         }
@@ -43,39 +42,21 @@ namespace solum
 
         static void RunKeyValueTest()
         {
+            var db = "test-db";
+            var key = "name";
+            var value = "Brad Serbu";
+
+            string savedValue;
+
             using (var server = Server.Current)
             {
-                var store = server.Storage.OpenKeyValueStore("test-db");
-                store.Set("name", "Brad Serbu");
-
-                string value;
-                store.Get("name", out value);
+                var store = server.Storage.OpenKeyValueStore(db);
+                store.Set(key, value);
+                store.Get(key, out savedValue);
+                store.Remove(key);                
             }
-        }
 
-        static void RunKeyValue2Test()
-        {
-            using (var store = new KeyValueStore2("./data/", "test"))
-            {
-                store.Open();
-
-                store.Set("greeting", "Hello World.");
-                store.Set("message", "Saying hello to the world.");
-
-                string greeting;
-                store.Get("greeting", out greeting);
-
-                string message;
-                store.Get("message", out message);
-
-                Console.WriteLine("greeting: {0}", greeting);
-                Console.WriteLine("message: {0}", message);
-
-                store.Remove("greeting");
-                store.Remove("message");
-
-                store.Close();
-            }
+            Console.WriteLine("Hello, {0}!", savedValue);
         }
 
         static void RunProcessTests()

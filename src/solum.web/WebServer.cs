@@ -39,7 +39,7 @@ namespace solum.web
         #endregion
 
         WebServerListener m_listener;
-        KeyValueStore m_session_logs;
+        KeyValueStore2 m_session_logs;
 
         protected override void OnLoad()
         {

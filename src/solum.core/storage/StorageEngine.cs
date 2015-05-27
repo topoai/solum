@@ -16,13 +16,13 @@ namespace solum.core.storage
         {
             this.DataDirectory = new DirectoryInfo(dataDirectory);
             this.m_databases = new List<Database>();
-            this.m_kv_stores = new List<KeyValueStore>();
+            this.m_kv_stores = new List<KeyValueStore2>();
         }
 
         public DirectoryInfo DataDirectory { get; private set; }
 
         List<Database> m_databases;
-        List<KeyValueStore> m_kv_stores;
+        List<KeyValueStore2> m_kv_stores;
 
         public void Open()
         {
@@ -54,7 +54,7 @@ namespace solum.core.storage
 
             return database;
         }
-        public KeyValueStore OpenKeyValueStore(string name)
+        public KeyValueStore2 OpenKeyValueStore(string name)
         {
             // ** Check if we have alreaedy opened this database
             var openedKeyValueStore = m_kv_stores.Where(d => d.Name.Equals(name, StringComparison.InvariantCultureIgnoreCase)).SingleOrDefault();
@@ -62,7 +62,7 @@ namespace solum.core.storage
                 return openedKeyValueStore;
 
             // ** The requested database has not been previously opened            
-            var keyValueStore = new KeyValueStore(DataDirectory, name, SystemSettings.Encoding);
+            var keyValueStore = new KeyValueStore2(DataDirectory.FullName + name, name, SystemSettings.Encoding);
 
             Log.Information("Opening key value store... {0}", name);
             keyValueStore.Open();
@@ -77,7 +77,7 @@ namespace solum.core.storage
             return m_databases.AsReadOnly();
         }
 
-        public IReadOnlyList<KeyValueStore> KeyValueStores()
+        public IReadOnlyList<KeyValueStore2> KeyValueStores()
         {
             return m_kv_stores.AsReadOnly();
         }

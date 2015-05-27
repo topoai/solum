@@ -9,32 +9,40 @@ namespace solum.core.statistics
 {
     public class StatisticsDatabase
     {
-        public StatisticsDatabase(KeyValueStore storage)
+        public StatisticsDatabase(KeyValueStore2 storage)
         {
             this.m_storage = storage;
         }
 
-        KeyValueStore m_storage;
+        KeyValueStore2 m_storage;
 
         public void SetValue(string name, long value)
         {
-            m_storage.Set(name, value);
+            m_storage.Set(name, value.ToString());
         }
         public bool GetValue(string name, out long value)
         {
+            value = 0;
             // TODO: Read Write Lock needs to happen here around Get and Update statements
-            return !m_storage.Get(name, out value);
+            string sValue;
+
+            if (m_storage.Get(name, out sValue) == false)
+                return false;
+
+            value = long.Parse(sValue);
+            return true;
         }
 
         #region Increment a Counter
         public void Increment(string name)
-        {
+        {            
             long currentValue;
 
             if (!m_storage.Get(name, out currentValue))
                 currentValue = 0;
 
-            m_storage.Update(name, currentValue + 1);            
+            //m_storage.Update(name, currentValue + 1);            
+            m_storage.Set(name, currentValue + 1);            
         }
         public void Increment(string name, out long value)
         {
@@ -45,7 +53,8 @@ namespace solum.core.statistics
                 currentValue = 0;
 
             var newValue = currentValue + 1;
-            m_storage.Update(name, newValue);
+            //m_storage.Update(name, newValue);
+            m_storage.Set(name, currentValue + 1);            
 
             value = newValue;
         }
