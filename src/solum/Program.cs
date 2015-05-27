@@ -2,6 +2,7 @@
 using solum.core;
 using solum.core.dataprocess;
 using solum.core.smtp;
+using solum.core.storage;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,13 +14,14 @@ namespace solum
 {
     class Program
     {
-        static ILogger Log = Log.ForContext(typeof(Program));
+        //static ILogger Log = Log.ForContext(typeof(Program));
 
         static void Main(string[] args)
         {
             //RunEmailTest();
             //RunKeyValueTest();
-            Server.RunServer();
+            RunKeyValue2Test();
+            // Server.RunServer();
             // RunProcessTests();
         }
 
@@ -37,7 +39,7 @@ namespace solum
 
                 server.Stop();
             }
-        }        
+        }
 
         static void RunKeyValueTest()
         {
@@ -48,6 +50,31 @@ namespace solum
 
                 string value;
                 store.Get("name", out value);
+            }
+        }
+
+        static void RunKeyValue2Test()
+        {
+            using (var store = new KeyValueStore2("./data/", "test"))
+            {
+                store.Open();
+
+                store.Set("greeting", "Hello World.");
+                store.Set("message", "Saying hello to the world.");
+
+                string greeting;
+                store.Get("greeting", out greeting);
+
+                string message;
+                store.Get("message", out message);
+
+                Console.WriteLine("greeting: {0}", greeting);
+                Console.WriteLine("message: {0}", message);
+
+                store.Remove("greeting");
+                store.Remove("message");
+
+                store.Close();
             }
         }
 

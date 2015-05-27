@@ -122,6 +122,7 @@
     <Compile Include="storage\KeyValueStore.cs" />
     <Compile Include="storage\Database_Read.cs" />
     <Compile Include="storage\Database_Write.cs" />
+    <Compile Include="storage\KeyValueStore2.cs" />
     <Compile Include="storage\KeyValueStore_GetSet.cs" />
     <Compile Include="storage\Record.cs" />
     <Compile Include="storage\RecordHeader.cs" />
@@ -148,6 +149,10 @@
   </Target>
   -->
   <ItemGroup>
+    <ProjectReference Include="..\..\lib\Lightning.NET\src\LightningDB\LightningDB.csproj">
+      <Project>{4a034d32-98a2-4a6d-9569-d26b5c151ae0}</Project>
+      <Name>LightningDB</Name>
+    </ProjectReference>
     <ProjectReference Include="..\solum.extensions\solum.extensions.csproj">
       <Project>{FF778F8A-BCDB-402E-A0EF-15A896B9DCBF}</Project>
       <Name>solum.extensions</Name>

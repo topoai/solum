@@ -62,6 +62,9 @@
   <PropertyGroup>
     <RootNamespace>solum</RootNamespace>
   </PropertyGroup>
+  <PropertyGroup>
+    <StartupObject>solum.Program</StartupObject>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="Serilog, Version=1.5.0.0, Culture=neutral, PublicKeyToken=24c2f752a8e58a10, processorArchitecture=MSIL">
       <HintPath>..\packages\Serilog.1.5.6\lib\net45\Serilog.dll</HintPath>
@@ -1722,6 +1725,10 @@
     </None>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\lib\Lightning.NET\src\LightningDB\LightningDB.csproj">
+      <Project>{4a034d32-98a2-4a6d-9569-d26b5c151ae0}</Project>
+      <Name>LightningDB</Name>
+    </ProjectReference>
     <ProjectReference Include="..\solum.core\solum.core.csproj">
       <Project>{69546C30-149A-42F6-8A73-BCE9D74D553D}</Project>
       <Name>solum.core</Name>
