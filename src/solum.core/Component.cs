@@ -11,7 +11,7 @@ namespace solum.core
     {
         protected Component()
         {
-            this.Log = Serilog.Log.ForContext(this.GetType());
+            this.Log = Serilog.Log.Logger.ForContext(this.GetType());
         }
 
         protected Component(ILogger log)
