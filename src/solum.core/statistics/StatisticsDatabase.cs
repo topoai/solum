@@ -9,12 +9,12 @@ namespace solum.core.statistics
 {
     public class StatisticsDatabase
     {
-        public StatisticsDatabase(KeyValueStore2 storage)
+        public StatisticsDatabase(KeyValueStore storage)
         {
             this.m_storage = storage;
         }
 
-        KeyValueStore2 m_storage;
+        KeyValueStore m_storage;
 
         public void SetValue(string name, long value)
         {

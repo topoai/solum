@@ -1,4 +1,5 @@
-﻿using RaptorDB;
+﻿using LightningDB;
+using solum.extensions;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -8,126 +9,188 @@ using System.Threading.Tasks;
 
 namespace solum.core.storage
 {
-    public partial class KeyValueStore : Component, IDisposable
+    public class KeyValueStore : NamedComponent, IDisposable
     {
-        #region Converters to access underlying Database
-        public static implicit operator Database(KeyValueStore store)
+        const long DEFAULT_MAX_DB_SIZE = 4096000000; // 4GB
+
+        public KeyValueStore(string dataDirectory, string name, Encoding encoding)
+            : base(name)
         {
-            store.ensureOpened();
-            return store.m_database;
-        }
-        #endregion
-
-        public const byte DEFAULT_KEY_SIZE = 255;
-        public const ushort DEFAULT_PAGE_SIZE = 10000;        
-
-        public KeyValueStore(DirectoryInfo dataDirectory, string name, Encoding encoding)
-        {
-            // ** Underlying data store
-            this.m_database = new Database(dataDirectory, name, encoding);
-
-            this.Name = name;
+            this.DatabaseDirectory = dataDirectory;
+            this.Encoding = encoding;
             this.IsOpened = false;
-            this.DataDirectory = dataDirectory;
-            this.m_keysize = DEFAULT_KEY_SIZE;
-            this.m_pagesize = DEFAULT_PAGE_SIZE;
         }
 
-        public string Name { get; private set; }
-        public DirectoryInfo DataDirectory { get; private set; }
+        public string DatabaseDirectory { get; private set; }
+        public Encoding Encoding { get; private set; }
         public bool IsOpened { get; private set; }
-        public long NumRecords { get { return m_database.NumRecords; } }
+        public long NumRecords { get { return m_env.EntriesCount; } }
         
-        byte m_keysize;
-        ushort m_pagesize;
-        Database m_database;
-        MGIndex<string> m_index; // TODO: This should support long's
-
+        LightningEnvironment m_env;
+        
         public void Open()
         {
-            if (IsOpened)
+            Log.Verbose("Checking if database directory exists... {directory}", DatabaseDirectory);
+            if (!Directory.Exists(DatabaseDirectory))
             {
-                Log.Warning("Key Value Store already opened. {0}", Name);
-                return;
+                Log.Information("Creating database directory: {directory}", DatabaseDirectory);
+                Directory.CreateDirectory(DatabaseDirectory);
             }
 
-            // ** Open the database
-            Log.Debug("Opening the database...");
-            m_database.Open();
+            var filePath = Path.Combine(DatabaseDirectory, "data.mdb");
+            bool exists = File.Exists(filePath);
 
-            // ** Create an index
-            Log.Debug("Opening the index...");
-            var indexPath = Path.Combine(DataDirectory.FullName);
-            var indexFileName = "{0}.idx".format(Name);
-            this.m_index = new MGIndex<string>(indexPath, indexFileName, m_keysize, m_pagesize, false);
+            Log.Debug("Initializing database environment... {databaseName}", Name);
+            m_env = new LightningEnvironment(DatabaseDirectory, EnvironmentOpenFlags.NoSync | EnvironmentOpenFlags.WriteMap);            
 
-            this.IsOpened = true;
+            Log.Verbose("Opening the database environment... {databaseName}", Name);
+            m_env.Open();
+            
+            // ** If the file was created when openeing the database, close the environment, Mark this file as "Sparse", and re-open
+            if (exists == false)
+            {
+                m_env.Close();
+
+                Log.Debug("Marking data file as sparse... {filePath}");
+                FileExtensions.MarkAsSparseFile(filePath);
+
+                Log.Verbose("Re-opening data file...");
+                m_env = new LightningEnvironment(DatabaseDirectory, EnvironmentOpenFlags.NoSync | EnvironmentOpenFlags.WriteMap);
+                m_env.MapSize = DEFAULT_MAX_DB_SIZE;
+
+                Log.Verbose("Opening the database environment... {databaseName}", Name);
+                m_env.Open();
+            }
+            
+            //m_env.CopyTo(filePath, true);
+            
+            IsOpened = true;
         }
         public void Close()
         {
             if (!IsOpened)
+                return;
+
+            IsOpened = false;
+
+            Log.Verbose("Checking if database is initialized... {databaseName}", Name);
+            if (m_env == null)
             {
-                Log.Warning("The database is not opened.  {0}", Name);
+                Log.Warning("[NOOP] Database is not initialized... {databaseName}", Name);
                 return;
             }
 
-            Log.Debug("Shutting down the database...");
-            m_database.Close();
-
-            Log.Debug("Shutting down the index...");
-            //m_index.SaveIndex();
-            if (m_index != null)
-                m_index.Shutdown();
-        }
-        
-
-        public bool Remove(string key)
-        {
-            ensureOpened();
-
-            //lock (m_index)
+            Log.Verbose("Checking if database is opened... {databaseName}", Name);
+            if (m_env.IsOpened == false)
             {
-                // ** Search for the key in the index
-                int id;
-                if (m_index.Get(key, out id) == false)
-                    return false;
+                Log.Warning("[NOOP] Database is not opened... {databaseName}", Name);
+                return;
+            }
 
-                // ** Remove the key from the database
-                m_database.Delete(id);
+            //Log.Debug("Closing the databse... {databaseName}", Name);            
+            //m_db.Close();
 
-                // ** Remove the key from the index
-                m_index.RemoveKey(key);
+            Log.Debug("Flushing the database contents... {databaseName}", Name);
+            m_env.Flush(force: true);
 
-                return true;
+            Log.Information("Closing database... {databaseName}", Name);
+            m_env.Close();
+            m_env.Dispose();
+        }
+
+
+        public IEnumerable<string> Keys()
+        {
+            using (var txn = m_env.BeginTransaction(TransactionBeginFlags.ReadOnly))
+            foreach (var kvp in txn.EnumerateDatabase())
+            {
+                var key = kvp.Key<string>();
+                yield return key;
+            }
+        }
+
+        public IEnumerable<string> Values()
+        {
+            using (var txn = m_env.BeginTransaction(TransactionBeginFlags.ReadOnly))
+            foreach (var kvp in txn.EnumerateDatabase())
+            {
+                var value = kvp.Value<string>();
+                yield return value;
             }
         }
 
         public bool ContainsKey(string key)
         {
-            ensureOpened();
+            bool hasKey = false;
 
-            int id;
-            //(m_index)
-                return m_index.Get(key, out id);
+            using (var txn = m_env.BeginTransaction(TransactionBeginFlags.ReadOnly))
+                hasKey = txn.ContainsKey(key);
+
+            return hasKey;
         }
 
-        /// <summary>
-        /// Helper method to ensure the database is Open() before writing or reading
-        /// </summary>
+        public void Set(string key, string value)
+        {
+            ensureOpened();
+
+            Log.Verbose("Setting key: {key}... value={value}", key, value);
+            using (var txn = m_env.BeginTransaction())
+            {
+                txn.Put<string, string>(key, value);
+                txn.Commit();
+            }
+        }
+        public bool Get(string key, out string value)
+        {
+            ensureOpened();
+
+            Log.Verbose("Getting key: {key}...", key);
+            using (var txn = m_env.BeginTransaction(TransactionBeginFlags.ReadOnly))
+            {
+                value = txn.Get<string>(key);
+            }
+
+            return true;
+        }
+        public void Set(string key, long value)
+        {
+            Set(key, value.ToString());
+        }
+
+        public bool Get(string key, out long value)
+        {
+            value = 0;
+            string sValue;
+
+            if (Get(key, out sValue) == false)
+                return false;
+
+            value = long.Parse(sValue);
+            return true;
+        }
+        public bool Remove(string key)
+        {
+            Log.Verbose("Removing key: {key}...", key);
+            using (var txn = m_env.BeginTransaction())
+            {
+                txn.Delete<string>(key);
+                txn.Commit();
+            }
+
+            return true;
+        }
+
         void ensureOpened()
         {
             if (!IsOpened)
             {
-                Log.Error("Key value store is not opened. name={0}", Name);
-                throw new Exception("The key value store is not opened.");
+                throw new Exception("The database is not opened: {databaseName}".format(Name));
             }
         }
 
-        #region Explicit Interface
         void IDisposable.Dispose()
         {
             Close();
         }
-        #endregion
     }
 }

@@ -119,11 +119,9 @@
     <Compile Include="storage\Database.cs" />
     <Compile Include="storage\Database_Locking.cs" />
     <Compile Include="storage\Database_OpenClose.cs" />
-    <Compile Include="storage\KeyValueStore.cs" />
     <Compile Include="storage\Database_Read.cs" />
     <Compile Include="storage\Database_Write.cs" />
-    <Compile Include="storage\KeyValueStore2.cs" />
-    <Compile Include="storage\KeyValueStore_GetSet.cs" />
+    <Compile Include="storage\KeyValueStore.cs" />
     <Compile Include="storage\Record.cs" />
     <Compile Include="storage\RecordHeader.cs" />
     <Compile Include="storage\StorageEngine.cs" />
@@ -156,14 +154,6 @@
     <ProjectReference Include="..\solum.extensions\solum.extensions.csproj">
       <Project>{FF778F8A-BCDB-402E-A0EF-15A896B9DCBF}</Project>
       <Name>solum.extensions</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\lib\RaptorDB-Document\RaptorDB\RaptorDB.csproj">
-      <Project>{45F6BE30-989A-4749-B6A0-69099C8661F4}</Project>
-      <Name>RaptorDB</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\lib\RaptorDB-Document\RaptorDB.Common\RaptorDB.Common.csproj">
-      <Project>{32331D51-5BE0-41E2-AF1A-9B086C5AE809}</Project>
-      <Name>RaptorDB.Common</Name>
     </ProjectReference>
   </ItemGroup>
 </Project>
