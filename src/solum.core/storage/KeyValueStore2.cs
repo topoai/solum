@@ -1,4 +1,5 @@
 ﻿using LightningDB;
+using solum.extensions;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -10,6 +11,8 @@ namespace solum.core.storage
 {
     public class KeyValueStore2 : NamedComponent, IDisposable
     {
+        const long DEFAULT_MAX_DB_SIZE = 4096000000; // 4GB
+
         public KeyValueStore2(string dataDirectory, string name, Encoding encoding)
             : base(name)
         {
@@ -24,8 +27,7 @@ namespace solum.core.storage
         public long NumRecords { get { return m_env.EntriesCount; } }
         
         LightningEnvironment m_env;
-        LightningTransaction m_txn;
-
+        
         public void Open()
         {
             Log.Verbose("Checking if database directory exists... {directory}", DatabaseDirectory);
@@ -35,15 +37,33 @@ namespace solum.core.storage
                 Directory.CreateDirectory(DatabaseDirectory);
             }
 
+            var filePath = Path.Combine(DatabaseDirectory, "data.mdb");
+            bool exists = File.Exists(filePath);
+
             Log.Debug("Initializing database environment... {databaseName}", Name);
-            m_env = new LightningEnvironment(DatabaseDirectory);            
+            m_env = new LightningEnvironment(DatabaseDirectory, EnvironmentOpenFlags.NoSync | EnvironmentOpenFlags.WriteMap);            
 
             Log.Verbose("Opening the database environment... {databaseName}", Name);
             m_env.Open();
+            
+            // ** If the file was created when openeing the database, close the environment, Mark this file as "Sparse", and re-open
+            if (exists == false)
+            {
+                m_env.Close();
 
-            Log.Debug("Opening transaction... {databaseName}", Name);
-            m_txn = m_env.BeginTransaction();
+                Log.Debug("Marking data file as sparse... {filePath}");
+                FileExtensions.MarkAsSparseFile(filePath);
 
+                Log.Verbose("Re-opening data file...");
+                m_env = new LightningEnvironment(DatabaseDirectory, EnvironmentOpenFlags.NoSync | EnvironmentOpenFlags.WriteMap);
+                m_env.MapSize = DEFAULT_MAX_DB_SIZE;
+
+                Log.Verbose("Opening the database environment... {databaseName}", Name);
+                m_env.Open();
+            }
+            
+            //m_env.CopyTo(filePath, true);
+            
             IsOpened = true;
         }
         public void Close()
@@ -67,9 +87,6 @@ namespace solum.core.storage
                 return;
             }
 
-            Log.Debug("Commmiting transactions... {databaseName}", Name);
-            m_txn.Commit();
-
             //Log.Debug("Closing the databse... {databaseName}", Name);            
             //m_db.Close();
 
@@ -78,15 +95,14 @@ namespace solum.core.storage
 
             Log.Information("Closing database... {databaseName}", Name);
             m_env.Close();
-
-            m_txn.Dispose();
             m_env.Dispose();
         }
 
 
         public IEnumerable<string> Keys()
         {
-            foreach (var kvp in m_txn.EnumerateDatabase())
+            using (var txn = m_env.BeginTransaction(TransactionBeginFlags.ReadOnly))
+            foreach (var kvp in txn.EnumerateDatabase())
             {
                 var key = kvp.Key<string>();
                 yield return key;
@@ -95,7 +111,8 @@ namespace solum.core.storage
 
         public IEnumerable<string> Values()
         {
-            foreach (var kvp in m_txn.EnumerateDatabase())
+            using (var txn = m_env.BeginTransaction(TransactionBeginFlags.ReadOnly))
+            foreach (var kvp in txn.EnumerateDatabase())
             {
                 var value = kvp.Value<string>();
                 yield return value;
@@ -104,7 +121,12 @@ namespace solum.core.storage
 
         public bool ContainsKey(string key)
         {
-            return m_txn.ContainsKey(key);
+            bool hasKey = false;
+
+            using (var txn = m_env.BeginTransaction(TransactionBeginFlags.ReadOnly))
+                hasKey = txn.ContainsKey(key);
+
+            return hasKey;
         }
 
         public void Set(string key, string value)
@@ -112,7 +134,7 @@ namespace solum.core.storage
             ensureOpened();
 
             Log.Verbose("Setting key: {key}... value={value}", key, value);
-            using (var txn = m_env.BeginTransaction(m_txn, TransactionBeginFlags.None))
+            using (var txn = m_env.BeginTransaction())
             {
                 txn.Put<string, string>(key, value);
                 txn.Commit();
@@ -123,7 +145,7 @@ namespace solum.core.storage
             ensureOpened();
 
             Log.Verbose("Getting key: {key}...", key);
-            using (var txn = m_env.BeginTransaction(m_txn, TransactionBeginFlags.None))
+            using (var txn = m_env.BeginTransaction(TransactionBeginFlags.ReadOnly))
             {
                 value = txn.Get<string>(key);
             }
@@ -149,7 +171,7 @@ namespace solum.core.storage
         public bool Remove(string key)
         {
             Log.Verbose("Removing key: {key}...", key);
-            using (var txn = m_env.BeginTransaction(m_txn, TransactionBeginFlags.None))
+            using (var txn = m_env.BeginTransaction())
             {
                 txn.Delete<string>(key);
                 txn.Commit();

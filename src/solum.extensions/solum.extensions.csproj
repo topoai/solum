@@ -85,6 +85,7 @@
     <Compile Include="Assertions.cs" />
     <Compile Include="ConcurrentList.cs" />
     <Compile Include="DateTimeExtensions.cs" />
+    <Compile Include="FileExtensions.cs" />
     <Compile Include="FunctionalExtensions.cs" />
     <Compile Include="GuidExtensions.cs" />
     <Compile Include="JsonExtensions.cs" />

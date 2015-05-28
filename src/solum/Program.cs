@@ -3,6 +3,7 @@ using solum.core;
 using solum.core.dataprocess;
 using solum.core.smtp;
 using solum.core.storage;
+using solum.extensions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,12 +15,19 @@ namespace solum
 {
     class Program
     {
-        //static ILogger Log = Log.ForContext(typeof(Program));
-
         static void Main(string[] args)
         {
+            Console.WriteLine("Loading logger...");
+            Serilog.Log.Logger = new LoggerConfiguration()
+                            .ReadFrom.AppSettings()
+                            .Enrich.WithThreadId()
+                            .Enrich.FromLogContext()
+                            .CreateLogger();
+
+            var numRecords = 100000;
+
             //RunEmailTest();
-            RunKeyValueTest();            
+            RunKeyValueTest(numRecords);            
             // Server.RunServer();
             // RunProcessTests();
         }
@@ -40,23 +48,56 @@ namespace solum
             }
         }
 
-        static void RunKeyValueTest()
+        static void RunKeyValueTest(int numRecords = 1)
         {
             var db = "test-db";
             var key = "name";
             var value = "Brad Serbu";
-
-            string savedValue;
-
+            
             using (var server = Server.Current)
             {
                 var store = server.Storage.OpenKeyValueStore(db);
-                store.Set(key, value);
-                store.Get(key, out savedValue);
-                store.Remove(key);                
-            }
 
-            Console.WriteLine("Hello, {0}!", savedValue);
+                Log.Information("Setting  {0} records to key value store...", numRecords);
+                var setTimer = Timed.RunTimed(() =>
+                {
+                    for (var lcv = 0; lcv < numRecords; lcv++)
+                        store.Set("{0}-{1}".format(key, lcv), value);
+                });
+
+                Console.WriteLine("PRESS <ENTER> TO GET THE RECORDS...");
+                Console.ReadLine();
+
+                Log.Information("Getting  {0} records from key value store...", numRecords);
+                var getTimer = Timed.RunTimed(() =>
+                {
+                    string val;
+                    for (var lcv = 0; lcv < numRecords; lcv++)
+                    {
+                        var k = "{0}-{1}".format(key, lcv);
+                        if (store.Get(k, out val) == false)
+                            Log.Error("Error geting key: {0}...", key);
+                    }
+                });
+
+                Console.WriteLine("PRESS <ENTER> TO REMOVE THE RECORDS...");
+                Console.ReadLine();
+
+                Log.Information("Removing {0} records from key value store...", numRecords);                
+                var removeTimer = Timed.RunTimed(() =>
+                {
+                    for (var lcv = 0; lcv < numRecords; lcv++)
+                    {
+                        var k = "{0}-{1}".format(key, lcv);
+                        if (store.Remove(k) == false)
+                            Log.Error("Error removing key: {0}...", key);                        
+                    }
+                });
+
+                Log.Information("- SET.......... {0:N3}s ({1:N2}rec/s)", setTimer.TotalSeconds, numRecords / setTimer.TotalSeconds);
+                Log.Information("- GET.......... {0:N3}s ({1:N2}rec/s)", getTimer.TotalSeconds, numRecords / getTimer.TotalSeconds);
+                Log.Information("- REMOVE....... {0:N3}s ({1:N2}rec/s)", removeTimer.TotalSeconds, numRecords / removeTimer.TotalSeconds);
+            }            
         }
 
         static void RunProcessTests()
