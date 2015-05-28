@@ -1,7 +1,3 @@
-[submodule "lib/RaptorDB-Document"]
-	path = lib/RaptorDB-Document
-	url = https://github.com/bradserbu/RaptorDB-Document.git
-	
 [submodule "lib/Handlebars.Net"]
 	path = lib/Handlebars.Net
 	url = https://github.com/bradserbu/Handlebars.Net
