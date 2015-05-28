@@ -61,6 +61,10 @@ namespace solum.core.storage
                 Log.Verbose("Opening the database environment... {databaseName}", Name);
                 m_env.Open();
             }
+            else
+            {
+                m_env.MapSize = DEFAULT_MAX_DB_SIZE;
+            }
             
             //m_env.CopyTo(filePath, true);
             
